@@ -15,7 +15,7 @@ class StartFrame(MyFrame):
         effects = [Cycle(self._screen, FigletText("NetConfig", font='big'), self._screen.height // 2, delete_count=60)]
         self._screen.play([Scene(effects, 5)])
 
-    def _save(self):
+    def _save_update(self):
         pass
 
     def _add(self):

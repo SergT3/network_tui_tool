@@ -6,7 +6,7 @@ class NICFrame(MyFrame):
 
     @staticmethod
     def get_title():
-        return "Adding a NIC"
+        return "NIC"
 
     def init_layout(self):
         gap_layout1 = Layout([1, 1])

@@ -4,14 +4,22 @@ from asciimatics.exceptions import ResizeScreenError
 
 import sys
 
-from Frames.configs import ConfigsFrame
+from Frames.configs import ConfigsFrame, ConfigsModel
 # from Frames.start import StartFrame
 from Frames.devices import DevicesFrame
 from Frames.nic import NICFrame
 from Frames.home import HomeFrame
-from Frames.mappings import MappingsFrame
+from Frames.mappings import MappingsFrame, MappingsModel
 # from Frames.mappings_intro import IntroFrame
 from Frames.new_config import NewConfigFrame
+
+ModelForFrame = {
+    # DevicesFrame: DevicesModel  here maybe update devices will be added
+    "HomeFrame": None,
+    "MappingsFrame": MappingsModel,
+    "NICFrame": None,
+    "DevicesFrame": None
+}
 
 
 class NetConfig(object):
@@ -26,10 +34,15 @@ class NetConfig(object):
     def generate_scenes(self, screen):
         self.scenes = []
         self.scenes_by_name = {}
+        shared_configs_model = ConfigsModel()
         for frame in self.frames:
             #          if frame.get_title() == "Start" and hasattr(frame, "effects"):
             #        scene_obj = Scene(frame.effects, 0)
-            scene_obj = Scene([frame(screen)], -1, name=frame.get_title())
+            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig":
+                scene_obj = Scene([frame(screen, model=shared_configs_model)], name=frame.get_title())
+            else:
+                scene_obj = Scene([frame(screen, model=ModelForFrame[frame.get_title() + "Frame"])], -1,
+                                  name=frame.get_title())
             self.scenes.append(scene_obj)
             self.scenes_by_name[frame.get_title()] = scene_obj
         return self.scenes

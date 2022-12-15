@@ -17,11 +17,11 @@ class DevicesFrame(MyFrame):
         self.add_layout(layout1)
         hardware_objects = to_asciimatics_list(get_interfaces())
         layout1.add_widget(ListBox(len(hardware_objects), hardware_objects))
-        layout1.add_widget(Button("Done", self._save), 2)
+        layout1.add_widget(Button("Done", self._save_update), 2)
         # layout1.add_widget(Button("Mappings",screen.refresh()),2)
         self.fix()
 
-    def _save(self):
+    def _save_update(self):
         raise NextScene("Home")
 
     def _cancel(self):

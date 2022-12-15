@@ -5,14 +5,14 @@ from future.utils import with_metaclass
 
 
 class MyFrame(with_metaclass(ABCMeta, Frame)):
-    def __init__(self, screen):
+    def __init__(self, screen, model=None):
         super(MyFrame, self).__init__(screen,
                                       screen.height,
                                       screen.width,
                                       has_border=True,
                                       title=self.get_title())
         self._screen = screen
-        # self._model = model
+        self._model = model
         self.init_layout()
 
     @staticmethod

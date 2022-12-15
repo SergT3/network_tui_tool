@@ -24,7 +24,7 @@ class NewConfigFrame(MyFrame):
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
         layout2 = Layout([1, 1, 1, 1])
         self.add_layout(layout2)
-        layout2.add_widget(Button("Save", self._save))
+        layout2.add_widget(Button("Save", self._save_update))
         layout2.add_widget(Button("Add", self._add), 1)
         layout2.add_widget(Button("Delete", self._delete), 2)
         layout2.add_widget(Button("Cancel", self._cancel), 3)
@@ -40,7 +40,7 @@ class NewConfigFrame(MyFrame):
     def _raw(self):
         pass
 
-    def _save(self):
+    def _save_update(self):
         pass
 
     def _add(self):

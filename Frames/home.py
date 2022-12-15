@@ -32,7 +32,7 @@ class HomeFrame(MyFrame):
     def _devices(self):
         raise NextScene("Devices")
 
-    def _save(self):
+    def _save_update(self):
         return
 
     def _cancel(self):
