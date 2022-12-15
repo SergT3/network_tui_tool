@@ -26,7 +26,7 @@ class ConfigsModel(object):
         temp_file = open(config_name + ".yaml", "w")
         temp_file.close()
         chdir("..")
-        self._last_created_config = config_name + ".yaml"
+        self._last_created_config = config_name
         return
 
     @staticmethod

@@ -15,7 +15,7 @@ class NewConfigFrame(MyFrame):
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
         layout1 = Layout([1, 1, 1, 1])
         self.add_layout(layout1)
-        layout1.add_widget(Label("ConfigName"))
+        layout1.add_widget(Label(self._model._last_created_config))
         layout1.add_widget(Button("Raw", self._raw), 1)
         layout1.add_widget(CheckBox("OVS"), 2)
         layout1.add_widget(CheckBox("Linux"), 3)
