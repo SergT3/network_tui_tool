@@ -1,9 +1,9 @@
 from asciimatics.widgets import Layout, TextBox, Button
 from asciimatics.exceptions import NextScene
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class RawFrame(MyFrame):
+class RawFrame(InterruptFrame):
 
     @staticmethod
     def get_title():
@@ -23,7 +23,7 @@ class RawFrame(MyFrame):
         if self._model.get_raw_config():
             self.text_box.value = self._model._last_config_raw
         else:
-            pass
+            return
 
     def _cancel(self):
         raise NextScene("NewConfig")

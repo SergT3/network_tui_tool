@@ -2,10 +2,10 @@ from asciimatics.widgets import Layout, Label, Button
 from asciimatics.exceptions import NextScene
 
 # from Frames.mappings import MappingsFrame
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class HomeFrame(MyFrame):
+class HomeFrame(InterruptFrame):
 
     @staticmethod
     def get_title():

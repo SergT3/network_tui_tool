@@ -1,15 +1,31 @@
-from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox
+from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
 from asciimatics.exceptions import NextScene
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class NewConfigFrame(MyFrame):
+class NewConfigFrame(InterruptFrame):
 
     @staticmethod
     def get_title():
         return "NewConfig"
 
     def init_layout(self):
+        self._ovs_menu = [
+                          ("interface", self._model.add_interface),
+                          ("vlan", self._model.add_vlan),
+                          ("OVS_bridge", self._model.add_ovs_bridge),
+                          ("OVS_bond", self._model.add_ovs_bond),
+                          ("OVS_user_bridge", self._model.add_ovs_user_bridge),
+                          ("OVS_dpdk_bond", self._model.add_ovs_dpdk_bond),
+                          ("OVS_dpdk_port", self._model.add_dpdk_port)
+                        ]
+        self._linux_menu = [
+                            ("interface", self._model.add_interface),
+                            ("vlan", self._model.add_vlan),
+                            ("linux_bridge", self._model.add_linux_bridge),
+                            ("linux_bond", self._model.add_linux_bond)
+                           ]
+
         gap_layout1 = Layout([1])
         self.add_layout(gap_layout1)
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
@@ -49,7 +65,7 @@ class NewConfigFrame(MyFrame):
         pass
 
     def _add(self):
-        pass
+        self.pop_up = PopupMenu(self._screen, self.pop_up_item_list, self._screen.width // 2, self._screen.height // 2)
 
     def _delete(self):
         pass

@@ -1,6 +1,6 @@
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text
 from asciimatics.exceptions import NextScene
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 from utils import get_interfaces, to_asciimatics_list, dup_list_util, write_to_file
 
 
@@ -19,7 +19,7 @@ class MappingsModel(object):
         return write_to_file("mapping.yaml", interface_dict)
 
 
-class MappingsFrame(MyFrame):
+class MappingsFrame(InterruptFrame):
 
     @staticmethod
     def get_title():

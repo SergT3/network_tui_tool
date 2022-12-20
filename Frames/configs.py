@@ -4,7 +4,7 @@ from os import mkdir, chdir
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 from utils import list_files, exists, to_asciimatics_list
 
 
@@ -14,6 +14,7 @@ class ConfigsModel(object):
     _ovs_checkbox = False
     _linux_checkbox = False
 
+    # Methods for Configs
     @staticmethod
     def get_configs():
         is_directory = exists("Configs")
@@ -34,6 +35,21 @@ class ConfigsModel(object):
         chdir("..")
         self._last_created_config = config_name
         return
+
+
+    @staticmethod
+    def name_validator(name):
+        is_directory = exists("Configs")
+        if not is_directory:
+            return
+        chdir("Configs")
+        if name == "" or name is None or len(list_files(name + ".yaml")) != 0:
+            chdir("..")
+            return
+        chdir("..")
+        return True
+
+    # Methods for NewConfig
 
     def remove_unfinished_config(self):
         os.chdir("Configs")
@@ -68,20 +84,35 @@ class ConfigsModel(object):
         chdir("..")
         return True
 
-    @staticmethod
-    def name_validator(name):
-        is_directory = exists("Configs")
-        if not is_directory:
-            return
-        chdir("Configs")
-        if name == "" or name is None or len(list_files(name + ".yaml")) != 0:
-            chdir("..")
-            return
-        chdir("..")
-        return True
+    def add_interface(self):
+        pass
+
+    def add_vlan(self):
+        pass
+
+    def add_linux_bridge(self):
+        pass
+
+    def add_linux_bond(self):
+        pass
+
+    def add_ovs_bridge(self):
+        pass
+
+    def add_ovs_bond(self):
+        pass
+
+    def add_ovs_user_bridge(self):
+        pass
+
+    def add_ovs_dpdk_bond(self):
+        pass
+
+    def add_ovs_dpdk_port(self):
+        pass
 
 
-class ConfigsFrame(MyFrame):
+class ConfigsFrame(InterruptFrame):
 
     @staticmethod
     def get_title():

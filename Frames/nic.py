@@ -1,8 +1,8 @@
 from asciimatics.widgets import Layout, Label, Divider, Text, CheckBox
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class NICFrame(MyFrame):
+class NICFrame(InterruptFrame):
 
     @staticmethod
     def get_title():

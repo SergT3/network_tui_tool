@@ -1,9 +1,9 @@
 from asciimatics.widgets import Layout, Label, Button, Divider
 from asciimatics.exceptions import NextScene
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class IntroFrame(MyFrame):
+class IntroFrame(InterruptFrame):
 
     @staticmethod
     def get_title():

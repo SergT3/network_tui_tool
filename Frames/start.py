@@ -2,10 +2,10 @@ from asciimatics.effects import *
 from asciimatics.renderers import FigletText
 from asciimatics.scene import Scene
 
-from myframe import MyFrame
+from interruptframe import InterruptFrame
 
 
-class StartFrame(MyFrame):
+class StartFrame(InterruptFrame):
 
     @staticmethod
     def get_title():
