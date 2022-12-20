@@ -9,6 +9,7 @@ class MyFrame(with_metaclass(ABCMeta, Frame)):
         super(MyFrame, self).__init__(screen,
                                       screen.height,
                                       screen.width,
+                                      on_load=self._on_load if hasattr(self, "_on_load") else None,
                                       has_border=True,
                                       title=self.get_title())
         self._screen = screen

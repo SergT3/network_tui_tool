@@ -12,6 +12,7 @@ from Frames.home import HomeFrame
 from Frames.mappings import MappingsFrame, MappingsModel
 # from Frames.mappings_intro import IntroFrame
 from Frames.new_config import NewConfigFrame
+from Frames.raw import RawFrame
 
 ModelForFrame = {
     # DevicesFrame: DevicesModel  here maybe update devices will be added
@@ -28,7 +29,7 @@ class NetConfig(object):
 
         self.scenes = []
         self.scenes_by_name = {}
-        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, NICFrame]
+        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame, NICFrame]
         self.last_scene = None
 
     def generate_scenes(self, screen):
@@ -38,7 +39,7 @@ class NetConfig(object):
         for frame in self.frames:
             #          if frame.get_title() == "Start" and hasattr(frame, "effects"):
             #        scene_obj = Scene(frame.effects, 0)
-            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig":
+            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig" or frame.get_title() == "Raw":
                 scene_obj = Scene([frame(screen, model=shared_configs_model)], name=frame.get_title())
             else:
                 scene_obj = Scene([frame(screen, model=ModelForFrame[frame.get_title() + "Frame"])], -1,

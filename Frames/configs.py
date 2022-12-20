@@ -1,12 +1,18 @@
-from asciimatics.widgets import Layout, Button, Divider, ListBox, FileBrowser, PopUpDialog, Text
-from asciimatics.exceptions import NextScene, InvalidFields
+import os
+from os import mkdir, chdir
+
+from asciimatics.exceptions import NextScene
+from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
+
 from myframe import MyFrame
 from utils import list_files, exists, to_asciimatics_list
-from os import mkdir, chdir
 
 
 class ConfigsModel(object):
     _last_created_config = None
+    _last_config_raw = None
+    _ovs_checkbox = False
+    _linux_checkbox = False
 
     @staticmethod
     def get_configs():
@@ -28,6 +34,39 @@ class ConfigsModel(object):
         chdir("..")
         self._last_created_config = config_name
         return
+
+    def remove_unfinished_config(self):
+        os.chdir("Configs")
+        os.remove(self._last_created_config + ".yaml")
+        os.chdir("..")
+        self._last_created_config = None
+
+    # def ovs(self):
+    #     if self._ovs_checkbox == self._linux_checkbox:
+    #         self
+    #     temp = self._ovs_checkbox
+    #     self._linux_checkbox = temp
+    #     self._ovs_checkbox = not temp
+    #
+    # def linux(self):
+    #     temp = self._linux_checkbox
+    #     self._ovs_checkbox = temp
+    #     self._linux_checkbox = not temp
+
+    def get_raw_config(self, filename=_last_created_config):
+        os.chdir("Configs")
+        try:
+            temp = open(filename + ".yaml", mode="r")
+        except Exception:
+            chdir("..")
+            return False
+        if os.stat(filename + ".yaml").st_size == 0:
+            return False
+        raw = temp.readlines()
+        self._last_config_raw = raw
+        temp.close()
+        chdir("..")
+        return True
 
     @staticmethod
     def name_validator(name):

@@ -15,10 +15,11 @@ class NewConfigFrame(MyFrame):
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
         layout1 = Layout([1, 1, 1, 1])
         self.add_layout(layout1)
-        layout1.add_widget(Label(self._model._last_created_config))
+        self.config_name = Label("")
+        layout1.add_widget(self.config_name)
         layout1.add_widget(Button("Raw", self._raw), 1)
-        layout1.add_widget(CheckBox("OVS"), 2)
-        layout1.add_widget(CheckBox("Linux"), 3)
+        layout1.add_widget(CheckBox("OVS", name="OVS"), 2)
+        layout1.add_widget(CheckBox("Linux", name="linux"), 3)
         gap_layout2 = Layout([1])
         self.add_layout(gap_layout2)
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
@@ -37,8 +38,12 @@ class NewConfigFrame(MyFrame):
         layout3.add_widget(MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1], options))
         self.fix()
 
+    def _on_load(self):
+        self.config_name.text = self._model._last_created_config
+
     def _raw(self):
-        pass
+        self.save()
+        raise NextScene("Raw")
 
     def _save_update(self):
         pass
@@ -50,4 +55,5 @@ class NewConfigFrame(MyFrame):
         pass
 
     def _cancel(self):
+        self._model.remove_unfinished_config()
         raise NextScene("Home")
