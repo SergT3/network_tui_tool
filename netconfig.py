@@ -5,7 +5,7 @@ from asciimatics.exceptions import ResizeScreenError
 import sys
 
 from Frames.configs import ConfigsFrame, ConfigsModel
-# from Frames.start import StartFrame
+from Frames.start import StartFrame
 from Frames.devices import DevicesFrame
 from Frames.nic import NICFrame
 from Frames.home import HomeFrame
@@ -19,7 +19,8 @@ ModelForFrame = {
     "HomeFrame": None,
     "MappingsFrame": MappingsModel,
     "NICFrame": None,
-    "DevicesFrame": None
+    "DevicesFrame": None,
+    # "StartFrame": None
 }
 
 
@@ -29,7 +30,8 @@ class NetConfig(object):
 
         self.scenes = []
         self.scenes_by_name = {}
-        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame, NICFrame]
+        self.frames = [HomeFrame, MappingsFrame, DevicesFrame,
+                       ConfigsFrame, NewConfigFrame, RawFrame, NICFrame]
         self.last_scene = None
 
     def generate_scenes(self, screen):

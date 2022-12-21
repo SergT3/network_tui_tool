@@ -36,7 +36,6 @@ class ConfigsModel(object):
         self._last_created_config = config_name
         return
 
-
     @staticmethod
     def name_validator(name):
         is_directory = exists("Configs")
@@ -59,12 +58,14 @@ class ConfigsModel(object):
 
     # def ovs(self):
     #     if self._ovs_checkbox == self._linux_checkbox:
-    #         self
+    #         self._ovs_checkbox = not self._ovs_checkbox
     #     temp = self._ovs_checkbox
     #     self._linux_checkbox = temp
     #     self._ovs_checkbox = not temp
     #
     # def linux(self):
+    #     if self._ovs_checkbox == self._linux_checkbox:
+    #         self._linux_checkbox = not self._linux_checkbox
     #     temp = self._linux_checkbox
     #     self._ovs_checkbox = temp
     #     self._linux_checkbox = not temp
@@ -147,7 +148,7 @@ class ConfigsFrame(InterruptFrame):
         raise NextScene("Home")
 
     def _add(self):
-        self.pop_up = PopUpDialog(self._screen, "Enter name for new config", ["OK", "Cancel"], on_close=self._on_close)
+        self.pop_up = PopUpDialog(self._screen, "Enter name", ["OK", "Cancel"], on_close=self._on_close)
         # pop_layout = Layout([1])
         # pop_up.add_layout(pop_layout)
         self.pop_up._layouts[0].add_widget(Text("Here:", validator=self._model.name_validator, name="text"))
