@@ -14,7 +14,7 @@ class HomeFrame(InterruptFrame):
     def init_layout(self):
         layout1 = Layout([1, 1, 1, 1, 1, 1, 1, 1], True)
         self.add_layout(layout1)
-        layout1.add_widget(Label("Home:"))
+        layout1.add_widget(Label("Main Menu:"))
         layout1.add_widget(Button("Mappings", self._mappings))
         layout1.add_widget(Button("Configs", self._configs))
         layout1.add_widget(Button("Devices", self._devices))

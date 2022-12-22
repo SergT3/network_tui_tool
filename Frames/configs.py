@@ -1,5 +1,4 @@
-import os
-from os import mkdir, chdir
+from os import mkdir, chdir, remove, stat
 
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
@@ -37,6 +36,18 @@ class ConfigsModel(object):
         return
 
     @staticmethod
+    def delete_config(config_name):
+        if config_name is not None:
+            chdir("Configs")
+            try:
+                remove(config_name)
+            except Exception:
+                return
+            chdir("..")
+        else:
+            return
+
+    @staticmethod
     def name_validator(name):
         is_directory = exists("Configs")
         if not is_directory:
@@ -51,33 +62,22 @@ class ConfigsModel(object):
     # Methods for NewConfig
 
     def remove_unfinished_config(self):
-        os.chdir("Configs")
-        os.remove(self._last_created_config + ".yaml")
-        os.chdir("..")
+        chdir("Configs")
+        try:
+            remove(self._last_created_config + ".yaml")
+        except Exception:
+            return
+        chdir("..")
         self._last_created_config = None
 
-    # def ovs(self):
-    #     if self._ovs_checkbox == self._linux_checkbox:
-    #         self._ovs_checkbox = not self._ovs_checkbox
-    #     temp = self._ovs_checkbox
-    #     self._linux_checkbox = temp
-    #     self._ovs_checkbox = not temp
-    #
-    # def linux(self):
-    #     if self._ovs_checkbox == self._linux_checkbox:
-    #         self._linux_checkbox = not self._linux_checkbox
-    #     temp = self._linux_checkbox
-    #     self._ovs_checkbox = temp
-    #     self._linux_checkbox = not temp
-
     def get_raw_config(self, filename=_last_created_config):
-        os.chdir("Configs")
+        chdir("Configs")
         try:
             temp = open(filename + ".yaml", mode="r")
         except Exception:
             chdir("..")
             return False
-        if os.stat(filename + ".yaml").st_size == 0:
+        if stat(filename + ".yaml").st_size == 0:
             return False
         raw = temp.readlines()
         self._last_config_raw = raw
@@ -139,12 +139,14 @@ class ConfigsFrame(InterruptFrame):
         self.add_layout(layout2)
         configs = self._model.get_configs()
         if configs is not None:
-            layout2.add_widget(ListBox(len(configs), configs))
+            self.configs_list = ListBox(len(configs), configs, on_select=self._show, name="configs_list")
+            layout2.add_widget(self.configs_list)
         # descriptions = [("Description1", 1), ("Description2", 2), ("Description3", 3)]
         # layout2.add_widget(ListBox(3, descriptions), 1)
         self.fix()
 
     def _save_update(self):
+        self.save()
         raise NextScene("Home")
 
     def _add(self):
@@ -164,7 +166,18 @@ class ConfigsFrame(InterruptFrame):
             return
 
     def _delete(self):
-        pass
+        self._model.delete_config(self._selected_config)
+        self._selected_config = None
+        raise NextScene("Configs")
+
+    def _on_load(self):
+        self.configs_list.options = self._model.get_configs()
+        self.fix()
+
+    def _show(self):
+        self.save()
+        self._selected_config = self.data["configs_list"]
+        self.configs_list.blur()
 
     def _cancel(self):
         raise NextScene("Home")

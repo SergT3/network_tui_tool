@@ -53,7 +53,8 @@ class NewConfigFrame(InterruptFrame):
         layout3 = Layout([1], True)
         self.add_layout(layout3)
         options = [(["Object", "Hardware"], 1), (["     SubObject", ""], 2), (["Object2", "Hardware2"], 3)]
-        layout3.add_widget(MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1], options))
+        self._object_list = MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1], options, name="objects_list")
+        layout3.add_widget(self._object_list)
         self.fix()
 
     def _on_load(self):
@@ -62,9 +63,12 @@ class NewConfigFrame(InterruptFrame):
     def _checkbox(self):
         if self.ovs_box.value == self.linux_box.value:
             self.pop_up_menu_list = [("None", None)]
+            self._object_list.disabled = True
         if self.linux_box.value and not self.ovs_box.value:
+            self._object_list.disabled = False
             self.pop_up_menu_list = self._linux_menu
         if self.ovs_box.value and not self.linux_box.value:
+            self._object_list.disabled = False
             self.pop_up_menu_list = self._ovs_menu
 
     def _raw(self):
