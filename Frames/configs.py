@@ -86,31 +86,31 @@ class ConfigsModel(object):
         return True
 
     def add_interface(self):
-        pass
+        raise NextScene("Interface")
 
     def add_vlan(self):
-        pass
+        raise NextScene("Vlan")
 
     def add_linux_bridge(self):
-        pass
+        raise NextScene("LinuxBridge")
 
     def add_linux_bond(self):
-        pass
+        raise NextScene("LinuxBond")
 
     def add_ovs_bridge(self):
-        pass
+        raise NextScene("OVSBridge")
 
     def add_ovs_bond(self):
-        pass
+        raise NextScene("OVSBond")
 
     def add_ovs_user_bridge(self):
-        pass
+        raise NextScene("OVSUserBridge")
 
     def add_ovs_dpdk_bond(self):
-        pass
+        raise NextScene("OVSDpdkBond")
 
     def add_ovs_dpdk_port(self):
-        pass
+        raise NextScene("OVSDpdkPort")
 
 
 class ConfigsFrame(InterruptFrame):

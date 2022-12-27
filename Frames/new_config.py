@@ -52,7 +52,7 @@ class NewConfigFrame(InterruptFrame):
         gap_layout3.add_widget(Divider(draw_line=False, height=3))
         layout3 = Layout([1], True)
         self.add_layout(layout3)
-        options = [(["Object", "Hardware"], 1), (["     SubObject", ""], 2), (["Object2", "Hardware2"], 3)]
+        options = [(["Object", "ObjectType1"], 1), (["Object2", "ObjectType2"], 2)]
         self._object_list = MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1], options, name="objects_list")
         layout3.add_widget(self._object_list)
         self.fix()

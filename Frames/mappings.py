@@ -15,6 +15,7 @@ class MappingsModel(object):
             nic_list.remove((nic_name, nic_name))
         except Exception:
             return
+
     @staticmethod
     def mapping_writer(data, length):
         interface_dict = {}
@@ -105,7 +106,6 @@ class MappingsFrame(InterruptFrame):
             self._selected_nic = None
             raise NextScene("Mappings")
         return
-
 
     def _cancel(self):
         raise NextScene("Home")

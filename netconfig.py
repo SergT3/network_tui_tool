@@ -3,9 +3,16 @@ from asciimatics.scene import Scene
 from asciimatics.exceptions import ResizeScreenError
 
 import sys
-
+from NetworkObjectFrames.ovs_dpdk_port import OVSDpdkPortFrame, OVSDpdkPortModel
+from NetworkObjectFrames.ovs_dpdk_bond import OVSDpdkBondFrame, OVSDpdkBondModel
+from NetworkObjectFrames.ovs_user_bridge import OVSUserBridgeFrame, OVSUserBridgeModel
+from NetworkObjectFrames.ovs_bond import OVSBondFrame, OVSBondModel
+from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame, OVSBridgeModel
+from NetworkObjectFrames.linux_bond import LinuxBondFrame, LinuxBondModel
+from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame, LinuxBridgeModel
+from NetworkObjectFrames.vlan import VlanFrame, VlanModel
+from NetworkObjectFrames.interface import InterfaceFrame, InterfaceModel
 from Frames.configs import ConfigsFrame, ConfigsModel
-from Frames.start import StartFrame
 from Frames.devices import DevicesFrame
 from Frames.nic import NICFrame
 from Frames.home import HomeFrame
@@ -15,11 +22,20 @@ from Frames.new_config import NewConfigFrame
 from Frames.raw import RawFrame
 
 ModelForFrame = {
-    # DevicesFrame: DevicesModel  here maybe update devices will be added
+    # DevicesFrame: DevicesModel  here maybe "update devices" button will be added
     "HomeFrame": None,
     "MappingsFrame": MappingsModel,
     "NICFrame": None,
     "DevicesFrame": None,
+    "InterfaceFrame": InterfaceModel,
+    "VlanFrame": VlanModel,
+    "LinuxBridgeFrame": LinuxBridgeModel,
+    "LinuxBondFrame": LinuxBondModel,
+    "OVSBridgeFrame": OVSBridgeModel,
+    "OVSBondFrame": OVSBondModel,
+    "OVSUserBridgeFrame": OVSUserBridgeModel,
+    "OVSDpdkBondFrame": OVSDpdkBondModel,
+    "OVSDpdkPortFrame": OVSDpdkPortModel
     # "StartFrame": None
 }
 
@@ -30,8 +46,9 @@ class NetConfig(object):
 
         self.scenes = []
         self.scenes_by_name = {}
-        self.frames = [HomeFrame, MappingsFrame, DevicesFrame,
-                       ConfigsFrame, NewConfigFrame, RawFrame, NICFrame]
+        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame, NICFrame,
+                       InterfaceFrame, VlanFrame, LinuxBridgeFrame, LinuxBondFrame, OVSBridgeFrame, OVSBondFrame,
+                       OVSUserBridgeFrame, OVSDpdkBondFrame, OVSDpdkPortFrame]
         self.last_scene = None
 
     def generate_scenes(self, screen):
