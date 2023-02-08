@@ -2,6 +2,8 @@ from netconfig import NetConfig
 import sys
 import yaml
 import glob
+import utils
+
 
 # test_yaml = yaml.YAMLObject()
 # interface_dict = {'nic1': 'ensp1', 'nic2': 'en2'}
@@ -10,5 +12,5 @@ import glob
 
 test = NetConfig()
 test.run()
-# print(glob.glob("Configs"))
 
+# print(glob.glob("Configs"))

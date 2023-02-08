@@ -29,3 +29,14 @@ class OVSBondFrame(InterruptFrame):
 
     def _cancel(self):
         raise NextScene("NewConfig")
+
+    # def _checkbox(self):
+    #     if self.data["use_dhcp"] == self.data["use_dhcp6"]:
+    #
+    #         self._object_list.disabled = True
+    #     if self.linux_box.value and not self.ovs_box.value:
+    #         self._object_list.disabled = False
+    #         self.pop_up_menu_list = self._linux_menu
+    #     if self.ovs_box.value and not self.linux_box.value:
+    #         self._object_list.disabled = False
+    #         self.pop_up_menu_list = self._ovs_menu

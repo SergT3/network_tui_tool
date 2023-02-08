@@ -1,9 +1,8 @@
+import glob
+from os.path import exists
 import netifaces
 import yaml
-import glob
 
-def exists(dir_name):
-    return len(glob.glob(dir_name)) != 0
 
 def list_files(pattern):
     return glob.glob(pattern)
@@ -31,11 +30,35 @@ def dup_list_util(name, size):
     return nic_list
 
 
-def write_to_file(filename, data):
-    with open(filename, 'w') as file:
+def write_to_file(filename, data, open_type='w'):
+    with open(filename, open_type) as file:
         try:
             filedata = yaml.dump(data)
+            if open_type == 'a':
+                file.write("\n")
             file.write(filedata)
             return True
-        except Exception:
+        except yaml.YAMLError:
             return False
+
+
+def read_dict_from_yaml(filename):
+    if exists(filename):
+        with open(filename, "r") as file:
+            try:
+                file_dict = yaml.full_load(file)
+                return file_dict
+            except yaml.YAMLError:
+                return None
+    return None
+
+
+def get_frame_data(frame):
+    if exists(frame.get_title() + "_data.yaml"):
+        with open(frame.get_title() + "_data.yaml", "r") as file:
+            try:
+                frame_data = yaml.full_load(file)
+                return frame_data
+            except yaml.YAMLError or KeyError:
+                return None
+    return None

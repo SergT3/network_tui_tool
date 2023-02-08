@@ -1,38 +1,46 @@
 from os import mkdir, chdir, remove, stat
+from os.path import exists
 
+import touch
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
 from interruptframe import InterruptFrame
-from utils import list_files, exists, to_asciimatics_list
+from utils import list_files, to_asciimatics_list, write_to_file, read_dict_from_yaml
 
 
+# config->add->on_close
 class ConfigsModel(object):
-    _last_created_config = None
-    _last_config_raw = None
+    current_config = None
+    config_list = []
+    current_config_object_list = []
+    current_config_raw = None
     _ovs_checkbox = False
     _linux_checkbox = False
+    _delete_list = []
 
     # Methods for Configs
     @staticmethod
     def get_configs():
         is_directory = exists("Configs")
-        if not is_directory:
+        if is_directory:
+            chdir("Configs")
+            config_list = list_files("*.yaml")
+            chdir("..")
+            return to_asciimatics_list(config_list)
+        else:
             return
-        chdir("Configs")
-        config_list = list_files("*.yaml")
-        chdir("..")
-        return to_asciimatics_list(config_list)
 
     def add_config(self, config_name):
-        is_directory = exists("Configs")
-        if not is_directory:
+        self.current_config = config_name
+
+    def write_config(self):
+        if not exists("Configs"):
             mkdir("Configs")
-        chdir("Configs")
-        temp_file = open(config_name + ".yaml", "w")
-        temp_file.close()
-        chdir("..")
-        self._last_created_config = config_name
+        touch.touch("Configs/" + self.current_config + ".yaml")
+        write_to_file("Configs/" + self.current_config + ".yaml", {self.current_config: self.current_config_object_list})
+        self.current_config = None
+        self.current_config_object_list = []
         return
 
     @staticmethod
@@ -41,9 +49,10 @@ class ConfigsModel(object):
             chdir("Configs")
             try:
                 remove(config_name)
+                chdir("..")
             except Exception:
+                chdir("..")
                 return
-            chdir("..")
         else:
             return
 
@@ -62,28 +71,42 @@ class ConfigsModel(object):
     # Methods for NewConfig
 
     def remove_unfinished_config(self):
-        chdir("Configs")
-        try:
-            remove(self._last_created_config + ".yaml")
-        except Exception:
-            return
-        chdir("..")
-        self._last_created_config = None
+        # chdir("Configs")
+        # try:
+        #     remove(self.current_config + ".yaml")
+        # except Exception:
+        #     chdir("..")
+        #     return
+        # chdir("..")
+        self.current_config = None
+        self.current_config_object_list = []
+        return
 
-    def get_raw_config(self, filename=_last_created_config):
+    def get_raw_config(self):
         chdir("Configs")
         try:
-            temp = open(filename + ".yaml", mode="r")
+            temp = open(self.current_config + ".yaml", mode="r")
         except Exception:
             chdir("..")
             return False
-        if stat(filename + ".yaml").st_size == 0:
+        if stat(self.current_config + ".yaml").st_size == 0:
+            chdir("..")
             return False
         raw = temp.readlines()
-        self._last_config_raw = raw
+        self.current_config_raw = raw
         temp.close()
         chdir("..")
         return True
+
+    def handle_object(self, data):
+        if self.current_config is not None:
+            self.current_config_object_list.append(data)
+        raise NextScene("NewConfig")
+
+    def remove_object(self, object_to_remove):
+        while object_to_remove in self.current_config_object_list:
+            self.current_config_object_list.remove(object_to_remove)
+        raise NextScene("NewConfig")
 
     def add_interface(self):
         raise NextScene("Interface")
@@ -114,6 +137,7 @@ class ConfigsModel(object):
 
 
 class ConfigsFrame(InterruptFrame):
+    selected_config = None
 
     @staticmethod
     def get_title():
@@ -128,26 +152,20 @@ class ConfigsFrame(InterruptFrame):
         # layout_browse = Layout([1, 1, 1, 1])
         # self.add_layout(layout_browse)
         # layout_browse.add_widget(FileBrowser(6, "./../../PseudoConfigs/", "Browse"))
-        layout1.add_widget(Button("Save", self._save_update))
+        layout1.add_widget(Button("OK", self._cancel))
         layout1.add_widget(Button("Add", self._add), 1)
-        layout1.add_widget(Button("Delete", self._delete), 2)
-        layout1.add_widget(Button("Cancel", self._cancel), 3)
+        layout1.add_widget(Button("Edit", self._edit), 2)
+        layout1.add_widget(Button("Delete", self._delete), 3)
         gap_layout2 = Layout([1])
         self.add_layout(gap_layout2)
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
         layout2 = Layout([1, 3], True)
         self.add_layout(layout2)
-        configs = self._model.get_configs()
-        if configs is not None:
-            self.configs_list = ListBox(len(configs), configs, on_select=self._show, name="configs_list")
-            layout2.add_widget(self.configs_list)
+        self.configs_list = ListBox(5, [(["None"], None)], on_select=self._show, name="configs_list")
+        layout2.add_widget(self.configs_list)
         # descriptions = [("Description1", 1), ("Description2", 2), ("Description3", 3)]
         # layout2.add_widget(ListBox(3, descriptions), 1)
         self.fix()
-
-    def _save_update(self):
-        self.save()
-        raise NextScene("Home")
 
     def _add(self):
         self.pop_up = PopUpDialog(self._screen, "Enter name", ["OK", "Cancel"], on_close=self._on_close)
@@ -165,19 +183,38 @@ class ConfigsFrame(InterruptFrame):
         else:
             return
 
+    def _edit(self):
+        self.save()
+        self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
+        self._model.current_config_object_list = \
+            read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml")[self._model.current_config]
+        # except FileNotFoundError or FileExistsError:
+        #     return
+        raise NextScene("NewConfig")
+
     def _delete(self):
-        self._model.delete_config(self._selected_config)
-        self._selected_config = None
-        raise NextScene("Configs")
+        if self.selected_config is not None:
+            self._model.delete_config(self.selected_config)
+            self.selected_config = None
+            raise NextScene("Configs")
 
     def _on_load(self):
         self.configs_list.options = self._model.get_configs()
-        self.fix()
 
     def _show(self):
         self.save()
-        self._selected_config = self.data["configs_list"]
-        self.configs_list.blur()
+        self.selected_config = self.data["configs_list"]
+        # self.configs_list.blur()
+
+    def update_configs_list(self):
+        self.configs_list.options = self._model.get_configs()
+        if len(self._model.current_config_object_list) != 0:
+            self.object_list.options = []
+            for i in self._model.current_config_object_list:
+                self.object_list.options.append(([i["name"], i["type"]], i))
+        else:
+            self.object_list.options = [(["None"], None)]
+        return
 
     def _cancel(self):
         raise NextScene("Home")

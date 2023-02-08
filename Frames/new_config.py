@@ -1,9 +1,11 @@
-from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
 from asciimatics.exceptions import NextScene
+from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
+
 from interruptframe import InterruptFrame
 
 
 class NewConfigFrame(InterruptFrame):
+    selected_object = None
 
     @staticmethod
     def get_title():
@@ -25,7 +27,6 @@ class NewConfigFrame(InterruptFrame):
             ("linux_bridge", self._model.add_linux_bridge),
             ("linux_bond", self._model.add_linux_bond)
         ]
-
         gap_layout1 = Layout([1])
         self.add_layout(gap_layout1)
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
@@ -52,23 +53,27 @@ class NewConfigFrame(InterruptFrame):
         gap_layout3.add_widget(Divider(draw_line=False, height=3))
         layout3 = Layout([1], True)
         self.add_layout(layout3)
-        options = [(["Object", "ObjectType1"], 1), (["Object2", "ObjectType2"], 2)]
-        self._object_list = MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1], options, name="objects_list")
-        layout3.add_widget(self._object_list)
+        self.object_list = MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
+                                              [(["None"], None)], name="objects_list", on_select=self._show)
+        layout3.add_widget(self.object_list)
         self.fix()
 
     def _on_load(self):
-        self.config_name.text = self._model._last_created_config
+        self.update_object_list()
+
+    def _show(self):
+        self.save()
+        self.selected_object = self.object_list.value
 
     def _checkbox(self):
         if self.ovs_box.value == self.linux_box.value:
             self.pop_up_menu_list = [("None", None)]
-            self._object_list.disabled = True
+            self.object_list.disabled = True
         if self.linux_box.value and not self.ovs_box.value:
-            self._object_list.disabled = False
+            self.object_list.disabled = False
             self.pop_up_menu_list = self._linux_menu
         if self.ovs_box.value and not self.linux_box.value:
-            self._object_list.disabled = False
+            self.object_list.disabled = False
             self.pop_up_menu_list = self._ovs_menu
 
     def _raw(self):
@@ -76,15 +81,38 @@ class NewConfigFrame(InterruptFrame):
         raise NextScene("Raw")
 
     def _save_update(self):
-        pass
+        self._model.write_config()
+        self._model.current_config = None
+        self._model.current_config_object_list = [(["None"], None)]
+        raise NextScene("Configs")
 
     def _add(self):
         self.pop_up = PopupMenu(self._screen, self.pop_up_menu_list, self._screen.width // 4, self._screen.height // 4)
         self.scene.add_effect(self.pop_up)
 
     def _delete(self):
-        pass
+        if self.selected_object is not None:
+            self._model.remove_object(self.selected_object)
+            self.object_list.options.remove(self.selected_object)
+            # self.object_list.options.remove(self.selected_object)
+            # self.object_list.update(0)
+            raise NextScene("NewConfig")
 
     def _cancel(self):
         self._model.remove_unfinished_config()
-        raise NextScene("Home")
+        self._model.current_config = None
+        self._model.current_config_object_list = [(["None"], None)]
+        raise NextScene("Configs")
+
+    def update_object_list(self):
+        if self._model.current_config is not None:
+            self.config_name.text = self._model.current_config
+            # chdir("Configs")
+            # object_dict = read_dict_from_yaml(self._model.current_config + ".yaml")
+            if len(self._model.current_config_object_list) != 0:
+                self.object_list.options = []
+                for i in self._model.current_config_object_list:
+                    self.object_list.options.append(([i["name"], i["type"]], i))
+            else:
+                self.object_list.options = [(["None"], None)]
+        return

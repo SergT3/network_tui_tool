@@ -21,9 +21,9 @@ class RawFrame(InterruptFrame):
 
     def _on_load(self):
         if self._model.get_raw_config():
-            self.text_box.value = self._model._last_config_raw
+            self.text_box.value = self._model.current_config_raw
         else:
-            return
+            self.text_box.value = ""
 
     def _cancel(self):
         raise NextScene("NewConfig")

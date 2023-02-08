@@ -11,7 +11,7 @@ from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame, OVSBridgeModel
 from NetworkObjectFrames.linux_bond import LinuxBondFrame, LinuxBondModel
 from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame, LinuxBridgeModel
 from NetworkObjectFrames.vlan import VlanFrame, VlanModel
-from NetworkObjectFrames.interface import InterfaceFrame, InterfaceModel
+from NetworkObjectFrames.interface import InterfaceFrame    # InterfaceModel
 from Frames.configs import ConfigsFrame, ConfigsModel
 from Frames.devices import DevicesFrame
 from Frames.nic import NICFrame
@@ -20,6 +20,7 @@ from Frames.mappings import MappingsFrame, MappingsModel
 # from Frames.mappings_intro import IntroFrame
 from Frames.new_config import NewConfigFrame
 from Frames.raw import RawFrame
+from utils import get_frame_data
 
 ModelForFrame = {
     # DevicesFrame: DevicesModel  here maybe "update devices" button will be added
@@ -27,17 +28,20 @@ ModelForFrame = {
     "MappingsFrame": MappingsModel,
     "NICFrame": None,
     "DevicesFrame": None,
-    "InterfaceFrame": InterfaceModel,
-    "VlanFrame": VlanModel,
-    "LinuxBridgeFrame": LinuxBridgeModel,
-    "LinuxBondFrame": LinuxBondModel,
-    "OVSBridgeFrame": OVSBridgeModel,
-    "OVSBondFrame": OVSBondModel,
-    "OVSUserBridgeFrame": OVSUserBridgeModel,
-    "OVSDpdkBondFrame": OVSDpdkBondModel,
-    "OVSDpdkPortFrame": OVSDpdkPortModel
+    # "InterfaceFrame": InterfaceModel,
+    # "VlanFrame": VlanModel,
+    # "LinuxBridgeFrame": LinuxBridgeModel,
+    # "LinuxBondFrame": LinuxBondModel,
+    # "OVSBridgeFrame": OVSBridgeModel,
+    # "OVSBondFrame": OVSBondModel,
+    # "OVSUserBridgeFrame": OVSUserBridgeModel,
+    # "OVSDpdkBondFrame": OVSDpdkBondModel,
+    # "OVSDpdkPortFrame": OVSDpdkPortModel
     # "StartFrame": None
 }
+
+NetworkObjects = ["Interface", "Vlan", "LinuxBridge", "LinuxBond", "OVSBridge",
+                  "OVSBond", "OVSUserBridge", "OVSDpdkBond", "OVSDpdkPort"]
 
 
 class NetConfig(object):
@@ -58,11 +62,13 @@ class NetConfig(object):
         for frame in self.frames:
             #          if frame.get_title() == "Start" and hasattr(frame, "effects"):
             #        scene_obj = Scene(frame.effects, 0)
-            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig" or frame.get_title() == "Raw":
-                scene_obj = Scene([frame(screen, model=shared_configs_model)], name=frame.get_title())
+            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig"\
+                    or frame.get_title() == "Raw" or frame.get_title() in NetworkObjects:
+                scene_obj = Scene([frame(screen, get_frame_data(frame),
+                                         model=shared_configs_model)], name=frame.get_title())
             else:
-                scene_obj = Scene([frame(screen, model=ModelForFrame[frame.get_title() + "Frame"])], -1,
-                                  name=frame.get_title())
+                scene_obj = Scene([frame(screen, get_frame_data(frame),
+                                         model=ModelForFrame[frame.get_title() + "Frame"])], -1, name=frame.get_title())
             self.scenes.append(scene_obj)
             self.scenes_by_name[frame.get_title()] = scene_obj
         return self.scenes
