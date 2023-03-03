@@ -1,6 +1,7 @@
 common_list = ["addresses", "dns_servers", "domain", "routes", "rules"]
-common_text = ["dhclient_args", "mtu", "name"]
+common_text = ["name",  "mtu", "dhclient_args"]
 common_check = ["defroute", "nm_controlled", "on_boot", "primary", "use_dhcp", "use_dhcpv6"]
+route_titles = ["default", "destination", "next_hop", "route_table", "route_options"]
 
 ovs_common = ["ovs_options", "ovs_extra", "ovs_fail_mode"]
 

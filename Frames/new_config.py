@@ -29,11 +29,13 @@ class NewConfigFrame(InterruptFrame):
         ]
         gap_layout1 = Layout([1])
         self.add_layout(gap_layout1)
+        self.config_name = Label("")
+        gap_layout1.add_widget(Divider(draw_line=False, height=3))
+        gap_layout1.add_widget(self.config_name)
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
         layout1 = Layout([1, 1, 1, 1])
         self.add_layout(layout1)
-        self.config_name = Label("")
-        layout1.add_widget(self.config_name)
+        layout1.add_widget(Button("Edit", self._edit), 0)
         layout1.add_widget(Button("Raw", self._raw), 1)
         self.ovs_box = CheckBox("OVS", on_change=self._checkbox, name="OVS")
         self.linux_box = CheckBox("Linux", on_change=self._checkbox, name="linux")
@@ -76,6 +78,13 @@ class NewConfigFrame(InterruptFrame):
             self.object_list.disabled = False
             self.pop_up_menu_list = self._ovs_menu
 
+    def _edit(self):
+        for i in self._model.current_config_object_list:
+            if i == self.selected_object:
+                self._model.current_network_object = i
+                self._model.current_config_object_list.remove(i)
+                raise NextScene(self._model.current_network_object["type"])
+
     def _raw(self):
         self.save()
         raise NextScene("Raw")
@@ -114,5 +123,5 @@ class NewConfigFrame(InterruptFrame):
                 for i in self._model.current_config_object_list:
                     self.object_list.options.append(([i["name"], i["type"]], i))
             else:
-                self.object_list.options = [(["None"], None)]
+                self.object_list.options = []
         return

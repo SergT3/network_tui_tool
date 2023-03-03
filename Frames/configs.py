@@ -9,7 +9,6 @@ from interruptframe import InterruptFrame
 from utils import list_files, to_asciimatics_list, write_to_file, read_dict_from_yaml
 
 
-# config->add->on_close
 class ConfigsModel(object):
     current_config = None
     config_list = []
@@ -18,6 +17,7 @@ class ConfigsModel(object):
     _ovs_checkbox = False
     _linux_checkbox = False
     _delete_list = []
+    current_network_object = {}  # opt_data
 
     # Methods for Configs
     @staticmethod
@@ -38,7 +38,7 @@ class ConfigsModel(object):
         if not exists("Configs"):
             mkdir("Configs")
         touch.touch("Configs/" + self.current_config + ".yaml")
-        write_to_file("Configs/" + self.current_config + ".yaml", {self.current_config: self.current_config_object_list})
+        write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": self.current_config_object_list})
         self.current_config = None
         self.current_config_object_list = []
         return
@@ -187,7 +187,7 @@ class ConfigsFrame(InterruptFrame):
         self.save()
         self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
         self._model.current_config_object_list = \
-            read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml")[self._model.current_config]
+            read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml")["network_config"]
         # except FileNotFoundError or FileExistsError:
         #     return
         raise NextScene("NewConfig")
