@@ -11,7 +11,7 @@ vlan = ["mtu", "addresses", "routes", "device", "vlan_id"]
 linux_bridge = ["members*"]  # + common_attributes
 # interfaces
 
-linux_bond = ["members*", "bonding_options"]  # + common_attributes
+linux_bond = ["members", "bonding_options"]  # + common_attributes
 # interfaces
 
 ovs_bridge = ["members*"]  # + common_attributes + common_ovs_attributes

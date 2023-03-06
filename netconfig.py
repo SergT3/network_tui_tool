@@ -8,9 +8,9 @@ from NetworkObjectFrames.ovs_dpdk_bond import OVSDpdkBondFrame, OVSDpdkBondModel
 from NetworkObjectFrames.ovs_user_bridge import OVSUserBridgeFrame, OVSUserBridgeModel
 from NetworkObjectFrames.ovs_bond import OVSBondFrame, OVSBondModel
 from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame, OVSBridgeModel
-from NetworkObjectFrames.linux_bond import LinuxBondFrame, LinuxBondModel
-from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame, LinuxBridgeModel
-from NetworkObjectFrames.vlan import VlanFrame, VlanModel
+from NetworkObjectFrames.linux_bond import LinuxBondFrame
+from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame
+from NetworkObjectFrames.vlan import VlanFrame
 from NetworkObjectFrames.interface import InterfaceFrame    # InterfaceModel
 from Frames.configs import ConfigsFrame, ConfigsModel
 from Frames.devices import DevicesFrame

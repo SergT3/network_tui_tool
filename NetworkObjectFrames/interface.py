@@ -43,24 +43,24 @@ class InterfaceFrame(InterruptFrame):
             self.layout1.add_widget(self.widget_dict[i])
         for i in common_list:
             if i == "addresses":
-                self.layout1.add_widget(Button("Add address", self._address))
+                self.layout1.add_widget(Button("Add address", self._add_address))
                 self.layout1.add_widget(Button("Delete address", self._delete_address))
                 self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 3 + 1, self._screen.width // 3 - 1],
                                                          [(["None"], None)],
                                                          add_scroll_bar=True, label=i, name=i, on_select=self._show_address)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "dns_servers":
-                self.layout1.add_widget(Button("Add DNS server", self._dns))
+                self.layout1.add_widget(Button("Add DNS server", self._add_dns))
                 self.layout1.add_widget(Button("Delete DNS server", self._delete_dns))
                 self.widget_dict[i] = ListBox(1, [("None", None)], label=i, name=i, on_select=self._show_dns)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "domain":
-                self.layout1.add_widget(Button("Add domain", self._domain))
+                self.layout1.add_widget(Button("Add domain", self._add_domain))
                 self.layout1.add_widget(Button("Delete domain", self._delete_domain))
                 self.widget_dict[i] = ListBox(1, [("None", None)], label=i, name=i, on_select=self._show_domain)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "routes":
-                self.layout1.add_widget(Button("Add route", self._route))
+                self.layout1.add_widget(Button("Add route", self._add_route))
                 self.layout1.add_widget(Button("Delete route", self._delete_route))
                 self.widget_dict[i] = MultiColumnListBox(1,
                                                          [self._screen.width // 5 + 1, self._screen.width // 5 + 1,
@@ -70,7 +70,8 @@ class InterfaceFrame(InterruptFrame):
                                                          add_scroll_bar=True, label=i, name=i, on_select=self._show_route)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "rules":
-                self.layout1.add_widget(Button("Add rule", self._rule))
+                self.layout1.add_widget(Button("Add rule", self._add_rule))
+                self.layout1.add_widget(Button("Delete rule", self._delete_rule))
                 self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
                                                          [(["None"], None)],
                                                          add_scroll_bar=True, label=i, name=i, on_select=self._show_rule)
@@ -185,7 +186,7 @@ class InterfaceFrame(InterruptFrame):
     def _cancel(self):
         raise NextScene("NewConfig")
 
-    def _address(self):
+    def _add_address(self):
         self.widget_dict["AddressPopUp"] = PopUpDialog(self._screen, "Enter new address",
                                                        ["OK", "Cancel"], on_close=self._address_on_close)
         self.widget_dict["AddressPopUp"]._layouts[0].add_widget(Text("Here:", validator=self._model.name_validator,
@@ -200,7 +201,7 @@ class InterfaceFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append((["ip_netmask", self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
                 self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
@@ -220,7 +221,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["addresses"].options = [(["None"], None)]
             self.selected_address = None
             self.fix()
-    def _dns(self):
+    def _add_dns(self):
         self.widget_dict["DNSPopUp"] = PopUpDialog(self._screen, "Enter DNS servers",
                                                    ["OK", "Cancel"], on_close=self._dns_on_close)
         self.widget_dict["DNSPopUp"]._layouts[0].add_widget(Text("DNS1:", validator=self._model.name_validator,
@@ -260,7 +261,7 @@ class InterfaceFrame(InterruptFrame):
             self.selected_dns = None
             self.fix()
 
-    def _domain(self):
+    def _add_domain(self):
         self.widget_dict["DomainPopUp"] = PopUpDialog(self._screen, "Enter new domain",
                                                       ["OK", "Cancel"], on_close=self._domain_on_close)
         self.widget_dict["DomainPopUp"]._layouts[0].add_widget(Text("Here:", validator=self._model.name_validator,
@@ -295,7 +296,7 @@ class InterfaceFrame(InterruptFrame):
             self.selected_domain = None
             self.fix()
 
-    def _route(self):
+    def _add_route(self):
         self.widget_dict["RoutePopUp"] = PopUpDialog(self._screen, "Enter new route",
                                                      ["OK", "Cancel"], on_close=self._route_on_close)
         for i in route_titles:
@@ -343,7 +344,7 @@ class InterfaceFrame(InterruptFrame):
             self.selected_route = None
             self.fix()
 
-    def _rule(self):
+    def _add_rule(self):
         self.widget_dict["RulePopUp"] = PopUpDialog(self._screen, "Enter new address",
                                                     ["OK", "Cancel"], on_close=self._rule_on_close)
         self.widget_dict["RulePopUp"]._layouts[0].add_widget(Text("Here:", validator=self._model.name_validator,
