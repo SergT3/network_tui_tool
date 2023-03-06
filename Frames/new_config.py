@@ -92,7 +92,7 @@ class NewConfigFrame(InterruptFrame):
     def _save_update(self):
         self._model.write_config()
         self._model.current_config = None
-        self._model.current_config_object_list = [(["None"], None)]
+        self._model.current_config_object_list = []
         raise NextScene("Configs")
 
     def _add(self):
@@ -110,7 +110,7 @@ class NewConfigFrame(InterruptFrame):
     def _cancel(self):
         self._model.remove_unfinished_config()
         self._model.current_config = None
-        self._model.current_config_object_list = [(["None"], None)]
+        self._model.current_config_object_list = []
         raise NextScene("Configs")
 
     def update_object_list(self):

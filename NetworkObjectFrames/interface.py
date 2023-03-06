@@ -122,22 +122,27 @@ class InterfaceFrame(InterruptFrame):
             for i in common_list:
                 self.widget_dict[i].options = []
                 if i == "addresses":
+                    self.widget_dict[i].options = []
                     if "addresses" in self._model.current_network_object:
                         for j in self.address_list:
-                            self.widget_dict[i].options.append((j["ip_netmask"], {"ip_netmask": j["ip_netmask"]}))
+                            self.widget_dict[i].options.append((["ip_netmask", j["ip_netmask"]],
+                                                                {"ip_netmask": j["ip_netmask"]}))
                         # self.widget_dict[i]._required_height = len(self.address_list)
                 elif i == "dns_servers":
                     if "dns_servers" in self._model.current_network_object:
+                        self.widget_dict[i].options = []
                         for j in self.dns_list:
                             self.widget_dict[i].options.append((j, j))
                         # self.widget_dict[i]._required_height = len(self.dns_list)
                 elif i == "domain":
                     if "domain" in self._model.current_network_object:
+                        self.widget_dict[i].options = []
                         for j in self.domain_list:
                             self.widget_dict[i].options.append((j, j))
                         # self.widget_dict[i]._required_height = len(self.domain_list)
                 elif i == "routes":
                     if "routes" in self._model.current_network_object:
+                        self.widget_dict[i].options = []
                         for j in self.route_list:
                             temp_route_list = []
                             for k in j:
@@ -146,6 +151,7 @@ class InterfaceFrame(InterruptFrame):
                         # self.widget_dict[i]._required_height = len(self.route_list)
                 elif i == "rules":
                     if "rules" in self._model.current_network_object:
+                        self.widget_dict[i].options = []
                         for j in self.rule_list:
                             temp_rule_list = []
                             for k in j:
@@ -194,12 +200,12 @@ class InterfaceFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append((["ip_netmask", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
                 self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
                 self.widget_dict["addresses"]._required_height += 1
-                self.fix()
+            self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
@@ -207,11 +213,12 @@ class InterfaceFrame(InterruptFrame):
         if self.selected_address is not None:
             while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
                 self.widget_dict["addresses"].options.remove(([self.selected_address["ip_netmask"]], self.selected_address))
-            self.address_list.remove(self.selected_address)
-            self.widget_dict["addresses"]._required_height -= 1
+                self.address_list.remove(self.selected_address)
+                self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
-                self.widget_dict["addresses"]._required_height += 1
+                self.widget_dict["addresses"]._required_height = 1
                 self.widget_dict["addresses"].options = [(["None"], None)]
+            self.selected_address = None
             self.fix()
     def _dns(self):
         self.widget_dict["DNSPopUp"] = PopUpDialog(self._screen, "Enter DNS servers",
@@ -236,19 +243,21 @@ class InterfaceFrame(InterruptFrame):
                 for i in self.dns_list:
                     self.widget_dict["dns_servers"].options.append((i, i))
                 self.widget_dict["dns_servers"]._required_height = len(self.dns_list)
-                self.fix()
+            self.fix()
 
     def _show_dns(self):
         self.selected_dns = self.widget_dict["dns_servers"].value
 
     def _delete_dns(self):
         if self.selected_dns is not None:
-            self.widget_dict["dns_servers"].options.remove((self.selected_dns, self.selected_dns))
-            self.dns_list.remove(self.selected_address)
-            self.widget_dict["dns_servers"]._required_height -= 1
-            if len(self.address_list) == 0:
-                self.widget_dict["addresses"]._required_height += 1
-                self.widget_dict["addresses"].options = [("None", None)]
+            while (self.selected_dns, self.selected_dns) in self.widget_dict["dns_servers"].options:
+                self.widget_dict["dns_servers"].options.remove((self.selected_dns, self.selected_dns))
+                self.dns_list.remove(self.selected_dns)
+                self.widget_dict["dns_servers"]._required_height -= 1
+            if len(self.dns_list) == 0:
+                self.widget_dict["dns_servers"]._required_height = 1
+                self.widget_dict["dns_servers"].options = [("None", None)]
+            self.selected_dns = None
             self.fix()
 
     def _domain(self):
@@ -269,19 +278,21 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["domain"].options.append((self.widget_dict["DomainPopUp"].data["text"],
                                                            self.widget_dict["DomainPopUp"].data["text"]))
                 self.widget_dict["domain"]._required_height = len(self.domain_list)
-                self.fix()
+            self.fix()
 
     def _show_domain(self):
         self.selected_domain = self.widget_dict["domain"].value
 
     def _delete_domain(self):
         if self.selected_domain is not None:
-            self.widget_dict["domain"].options.remove((self.selected_domain, self.selected_domain))
-            self.domain_list.remove(self.selected_domain)
-            self.widget_dict["domain"]._required_height -= 1
+            while (self.selected_domain, self.selected_domain) in self.widget_dict["domain"].options:
+                self.widget_dict["domain"].options.remove((self.selected_domain, self.selected_domain))
+                self.domain_list.remove(self.selected_domain)
+                self.widget_dict["domain"]._required_height -= 1
             if len(self.domain_list) == 0:
-                self.widget_dict["domain"]._required_height += 1
+                self.widget_dict["domain"]._required_height = 1
                 self.widget_dict["domain"].options = [("None", None)]
+            self.selected_domain = None
             self.fix()
 
     def _route(self):
@@ -317,17 +328,19 @@ class InterfaceFrame(InterruptFrame):
 
     def _delete_route(self):
         if self.selected_route is not None:
-            self.widget_dict["routes"].options.remove((self.selected_route, self.selected_route))
             temp_route_dict = {}
             j = 0
             for i in route_titles:
                 temp_route_dict[i] = self.selected_route[j]
                 j += 1
-            self.route_list.remove(temp_route_dict)
-            self.widget_dict["routes"]._required_height -= 1
+            while (self.selected_route, self.selected_route) in self.widget_dict["routes"].options:
+                self.widget_dict["routes"].options.remove((self.selected_route, self.selected_route))
+                self.route_list.remove(temp_route_dict)
+                self.widget_dict["routes"]._required_height -= 1
             if len(self.route_list) == 0:
-                self.widget_dict["routes"]._required_height += 1
+                self.widget_dict["routes"]._required_height = 1
                 self.widget_dict["routes"].options = [(["None"], None)]
+            self.selected_route = None
             self.fix()
 
     def _rule(self):
@@ -339,7 +352,6 @@ class InterfaceFrame(InterruptFrame):
                                                                   name="comment"))
         self.widget_dict["RulePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RulePopUp"])
-
     def _rule_on_close(self, choice):
         if choice == 0:
             self.widget_dict["RulePopUp"].save()
@@ -365,15 +377,17 @@ class InterfaceFrame(InterruptFrame):
 
     def _delete_rule(self):
         if self.selected_rule is not None:
-            self.widget_dict["rules"].options.remove((self.selected_rule, self.selected_rule))
             temp_rule_dict = {}
             j = 0
             for i in ["rule", "comment"]:
                 temp_rule_dict[i] = self.selected_rule[j]
                 j += 1
-            self.rule_list.remove(temp_rule_dict)
-            self.widget_dict["rules"]._required_height -= 1
-            if len(self.domain_list) == 0:
-                self.widget_dict["domain"]._required_height += 1
-                self.widget_dict["domain"].options = [("None", None)]
+            while (self.selected_rule, self.selected_rule) in self.widget_dict["rules"].options:
+                self.widget_dict["rules"].options.remove((self.selected_rule, self.selected_rule))
+                self.rule_list.remove(temp_rule_dict)
+                self.widget_dict["rules"]._required_height -= 1
+            if len(self.rule_list) == 0:
+                self.widget_dict["rules"]._required_height += 1
+                self.widget_dict["rules"].options = [(["None"], None)]
+            self.selected_rule = None
             self.fix()

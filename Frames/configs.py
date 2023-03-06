@@ -187,7 +187,7 @@ class ConfigsFrame(InterruptFrame):
         self.save()
         self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
         self._model.current_config_object_list = \
-            read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml")["network_config"]
+            (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
         # except FileNotFoundError or FileExistsError:
         #     return
         raise NextScene("NewConfig")
