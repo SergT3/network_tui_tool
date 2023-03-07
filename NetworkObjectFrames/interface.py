@@ -33,7 +33,7 @@ class InterfaceFrame(InterruptFrame):
         self.add_layout(self.layout1)
         self.widget_dict = {}
         object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "Interface"
+        object_type.value = "interface"
         self.layout1.add_widget(object_type)
         for i in common_text:
             self.widget_dict[i] = Text(label=i, name=i)
@@ -99,6 +99,7 @@ class InterfaceFrame(InterruptFrame):
                 if i == "dns_servers" or i == "domain":
                     self.widget_dict[i].options = [("None", None)]
                 else:
+
                     self.widget_dict[i].options = [(["None"], None)]
             for i in interface:
                 if i == "hotplug":
@@ -119,15 +120,17 @@ class InterfaceFrame(InterruptFrame):
 
             for i in common_text + common_check:
                 self.data[i] = self._model.current_network_object[i]
-
+                self.widget_dict[i].value = self._model.current_network_object[i]
             for i in common_list:
                 self.widget_dict[i].options = []
                 if i == "addresses":
                     self.widget_dict[i].options = []
                     if "addresses" in self._model.current_network_object:
+                        temp = []
                         for j in self.address_list:
-                            self.widget_dict[i].options.append((["ip_netmask", j["ip_netmask"]],
-                                                                {"ip_netmask": j["ip_netmask"]}))
+                            temp.append((["ip_netmask:", j["ip_netmask"]],
+                                         {"ip_netmask": j["ip_netmask"]}))
+                        self.widget_dict[i].options = temp
                         # self.widget_dict[i]._required_height = len(self.address_list)
                 elif i == "dns_servers":
                     if "dns_servers" in self._model.current_network_object:
@@ -201,7 +204,7 @@ class InterfaceFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
                 self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
@@ -212,8 +215,8 @@ class InterfaceFrame(InterruptFrame):
         self.selected_address = self.widget_dict["addresses"].value
     def _delete_address(self):
         if self.selected_address is not None:
-            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove(([self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
+                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:

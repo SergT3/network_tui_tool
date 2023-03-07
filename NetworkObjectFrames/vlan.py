@@ -1,28 +1,32 @@
 from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog
-
+from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog, DropdownList
+from utils import read_dict_from_yaml
 from NetworkObjectFrames.network_object_attributes import vlan, route_titles
 from interruptframe import InterruptFrame
 
 
 class VlanFrame(InterruptFrame):
-
     opt_data = None
     address_list = []
     route_list = []
     selected_address = None
     selected_route = None
+    available_devices = []
 
     @staticmethod
     def get_title():
         return "Vlan"
 
     def init_layout(self):
-        layout1 = Layout([1, 1, 1, 1], True)
-        self.add_layout(layout1)
+        self.layout1 = Layout([1, 1, 1, 1], True)
+        self.add_layout(self.layout1)
+        self.widget_dict = {}
+        object_type = Text(label="type", name="type", readonly=True)
+        object_type.value = "vlan"
+        self.layout1.add_widget(object_type)
         for i in vlan:
             if i == "vlan_id" or i == "mtu":
-                layout1.add_widget(Text(label=i, name=i))
+                self.layout1.add_widget(Text(label=i, name=i))
             elif i == "addresses":
                 self.layout1.add_widget(Button("Add address", self._add_address))
                 self.layout1.add_widget(Button("Delete address", self._delete_address))
@@ -39,11 +43,11 @@ class VlanFrame(InterruptFrame):
                                                           self._screen.width // 5 + 1, self._screen.width // 5 + 1,
                                                           self._screen.width // 5 - 4],
                                                          [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i, on_select=self._show_route)
-            elif i == "device":
-                self.layout1.add_widget(Button("Add route", self._select_device))
-                # self.widget_dict[i] = DropdownList()
+                                                         add_scroll_bar=True, label=i, name=i,
+                                                         on_select=self._show_route)
                 self.layout1.add_widget(self.widget_dict[i])
+            elif i == "device":
+                self.widget_dict[i] = DropdownList(self.available_devices, on_change=self._on_change, label=i, name=i)
                 self.layout1.add_widget(self.widget_dict[i])
         layout2 = Layout([1, 1, 1, 1])
         self.add_layout(layout2)
@@ -52,6 +56,9 @@ class VlanFrame(InterruptFrame):
 
     def _cancel(self):
         raise NextScene("NewConfig")
+
+    def _on_change(self):
+        pass
 
     def _add_address(self):
         self.widget_dict["AddressPopUp"] = PopUpDialog(self._screen, "Enter new address",
@@ -77,10 +84,13 @@ class VlanFrame(InterruptFrame):
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
+
     def _delete_address(self):
         if self.selected_address is not None:
-            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove(([self.selected_address["ip_netmask"]], self.selected_address))
+            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
+                "addresses"].options:
+                self.widget_dict["addresses"].options.remove(
+                    ([self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
@@ -96,7 +106,8 @@ class VlanFrame(InterruptFrame):
             # if i == default:
             # self.widget_dict["RoutePopUp"]._layouts[0].add_widget(CheckBox("", label=i, name=i))
             # error: object of type bool has no len
-            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(Text(i + ":", validator=self._model.name_validator, name=i))
+            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(
+                Text(i + ":", validator=self._model.name_validator, name=i))
         self.widget_dict["RoutePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RoutePopUp"])
 
@@ -136,6 +147,16 @@ class VlanFrame(InterruptFrame):
                 self.widget_dict["routes"].options = [(["None"], None)]
             self.selected_route = None
             self.fix()
+
+    def get_available_devices(self):
+        config = (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
+        for i in config:
+            if config[i]["type"] == "interface":
+                self.available_devices.append(config[i]["name"])
+            elif config[i]["type"] == "ovs_bond":
+                self.available_devices.append(config[i]["name"])
+            elif config[i]["type"] == "linux_bond":
+                self.available_devices.append(config[i]["name"])
 
     def _select_device(self):
         pass
