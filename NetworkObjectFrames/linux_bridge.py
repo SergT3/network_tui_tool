@@ -78,13 +78,15 @@ class LinuxBridgeFrame(InterruptFrame):
                                                          on_select=self._show_rule)
                 self.layout1.add_widget(self.widget_dict[i])
         for i in linux_bridge:
-            self.layout1.add_widget(Button("Add member", self._add_member))
-            self.layout1.add_widget(Button("Delete member", self._delete_member))
-            self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 3 + 1, self._screen.width // 3 + 1,
-                                                         self._screen.width // 3 - 3],
-                                                     [(["None"], None)],
-                                                     add_scroll_bar=True, label=i, name=i,
-                                                     on_select=self._show_member)
+            if i == "members":
+                self.layout1.add_widget(Button("Add member", self._add_member))
+                self.layout1.add_widget(Button("Delete member", self._delete_member))
+                self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 3 + 1, self._screen.width // 3 + 1,
+                                                             self._screen.width // 3 - 3],
+                                                         [(["None"], None)],
+                                                         add_scroll_bar=True, label=i, name=i,
+                                                         on_select=self._show_member)
+                self.layout1.add_widget(self.widget_dict[i])
         layout2 = Layout([1, 1, 1, 1])
         self.add_layout(layout2)
         layout2.add_widget(Button("Save", self._save_update))
@@ -327,6 +329,11 @@ class LinuxBridgeFrame(InterruptFrame):
 
     def _add_member(self):
         pass
+        # if config[i]["type"] == "interface":
+        #     self.available_devices.append({"type": "interface", "name": config[i]["name"], "mtu": config[i]["mtu"]})
+        # if config[i]["type"] == "vlan":
+        #     self.available_devices.append({"type": "vlan", "device": config[i]["device"],
+        #                                    "mtu": config[i]["mtu"], "vlan_id": config[i]["vlan_id"]})
 
     def _member_on_close(self):
         pass

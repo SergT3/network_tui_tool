@@ -83,7 +83,25 @@ class NewConfigFrame(InterruptFrame):
             if i == self.selected_object:
                 self._model.current_network_object = i
                 self._model.current_config_object_list.remove(i)
-                raise NextScene(self._model.current_network_object["type"])
+                temp_name = self._model.current_network_object["type"]
+                if temp_name == "interface":
+                    raise NextScene("Interface")
+                if temp_name == "vlan":
+                    raise NextScene("Vlan")
+                if temp_name == "linux_bond":
+                    raise NextScene("LinuxBond")
+                if temp_name == "linux_bridge":
+                    raise NextScene("LinuxBridge")
+                if temp_name == "ovs_bond":
+                    raise NextScene("OVSBond")
+                if temp_name == "ovs_bridge":
+                    raise NextScene("OVSBridge")
+                if temp_name == "ovs_dpdk_bond":
+                    raise NextScene("OVSDpdkBond")
+                if temp_name == "ovs_dpdk_port":
+                    raise NextScene("OVSDpdkPort")
+                if temp_name == "ovs_user_bridge":
+                    raise NextScene("OVSUserBridge")
 
     def _raw(self):
         self.save()
@@ -105,6 +123,7 @@ class NewConfigFrame(InterruptFrame):
             self.object_list.options.remove(self.selected_object)
             # self.object_list.options.remove(self.selected_object)
             # self.object_list.update(0)
+            self.selected_object = None
             raise NextScene("NewConfig")
 
     def _cancel(self):

@@ -86,6 +86,7 @@ class LinuxBondFrame(InterruptFrame):
                                                          [(["None"], None)],
                                                          add_scroll_bar=True, label=i, name=i,
                                                          on_select=self._show_member)
+                self.layout1.add_widget(self.widget_dict[i])
             else:
                 self.widget_dict[i] = Text(label=i, name=i)
                 self.layout1.add_widget(self.widget_dict[i])
