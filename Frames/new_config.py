@@ -1,5 +1,6 @@
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
+from utils import read_dict_from_yaml, exists
 
 from interruptframe import InterruptFrame
 
@@ -79,29 +80,30 @@ class NewConfigFrame(InterruptFrame):
             self.pop_up_menu_list = self._ovs_menu
 
     def _edit(self):
-        for i in self._model.current_config_object_list:
-            if i == self.selected_object:
-                self._model.current_network_object = i
-                self._model.current_config_object_list.remove(i)
-                temp_name = self._model.current_network_object["type"]
-                if temp_name == "interface":
-                    raise NextScene("Interface")
-                if temp_name == "vlan":
-                    raise NextScene("Vlan")
-                if temp_name == "linux_bond":
-                    raise NextScene("LinuxBond")
-                if temp_name == "linux_bridge":
-                    raise NextScene("LinuxBridge")
-                if temp_name == "ovs_bond":
-                    raise NextScene("OVSBond")
-                if temp_name == "ovs_bridge":
-                    raise NextScene("OVSBridge")
-                if temp_name == "ovs_dpdk_bond":
-                    raise NextScene("OVSDpdkBond")
-                if temp_name == "ovs_dpdk_port":
-                    raise NextScene("OVSDpdkPort")
-                if temp_name == "ovs_user_bridge":
-                    raise NextScene("OVSUserBridge")
+        if self.selected_object is not None:
+            for i in self._model.current_config_object_list:
+                if i == self.selected_object:
+                    self._model.current_network_object = i
+                    self._model.current_config_object_list.remove(i)
+                    temp_name = self._model.current_network_object["type"]
+                    if temp_name == "interface":
+                        raise NextScene("Interface")
+                    if temp_name == "vlan":
+                        raise NextScene("Vlan")
+                    if temp_name == "linux_bond":
+                        raise NextScene("LinuxBond")
+                    if temp_name == "linux_bridge":
+                        raise NextScene("LinuxBridge")
+                    if temp_name == "ovs_bond":
+                        raise NextScene("OVSBond")
+                    if temp_name == "ovs_bridge":
+                        raise NextScene("OVSBridge")
+                    if temp_name == "ovs_dpdk_bond":
+                        raise NextScene("OVSDpdkBond")
+                    if temp_name == "ovs_dpdk_port":
+                        raise NextScene("OVSDpdkPort")
+                    if temp_name == "ovs_user_bridge":
+                        raise NextScene("OVSUserBridge")
 
     def _raw(self):
         self.save()
@@ -121,15 +123,11 @@ class NewConfigFrame(InterruptFrame):
         if self.selected_object is not None:
             self._model.remove_object(self.selected_object)
             self.object_list.options.remove(self.selected_object)
-            # self.object_list.options.remove(self.selected_object)
-            # self.object_list.update(0)
             self.selected_object = None
-            raise NextScene("NewConfig")
+            self.fix()
 
     def _cancel(self):
-        self._model.remove_unfinished_config()
-        self._model.current_config = None
-        self._model.current_config_object_list = []
+        self._model.discard_config_changes()
         raise NextScene("Configs")
 
     def update_object_list(self):
@@ -142,5 +140,5 @@ class NewConfigFrame(InterruptFrame):
                 for i in self._model.current_config_object_list:
                     self.object_list.options.append(([i["name"], i["type"]], i))
             else:
-                self.object_list.options = []
-        return
+                self.object_list.options = [(["None"], None)]
+        self.fix()

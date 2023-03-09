@@ -26,10 +26,13 @@ class ConfigsModel(object):
         if is_directory:
             chdir("Configs")
             config_list = list_files("*.yaml")
+            if len(config_list) == 0:
+                chdir("..")
+                return [("None", None)]
             chdir("..")
             return to_asciimatics_list(config_list)
         else:
-            return
+            return [("None", None)]
 
     def add_config(self, config_name):
         self.current_config = config_name
@@ -37,7 +40,11 @@ class ConfigsModel(object):
     def write_config(self):
         if not exists("Configs"):
             mkdir("Configs")
-        touch.touch("Configs/" + self.current_config + ".yaml")
+        # touch.touch(str("Configs/" + self.current_config + ".yaml"))
+        chdir("Configs")
+        temp = open(self.current_config + ".yaml", "w")
+        temp.close()
+        chdir("..")
         write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": self.current_config_object_list})
         self.current_config = None
         self.current_config_object_list = []
@@ -70,43 +77,37 @@ class ConfigsModel(object):
 
     # Methods for NewConfig
 
-    def remove_unfinished_config(self):
-        # chdir("Configs")
-        # try:
-        #     remove(self.current_config + ".yaml")
-        # except Exception:
-        #     chdir("..")
-        #     return
-        # chdir("..")
+    def discard_config_changes(self):
         self.current_config = None
         self.current_config_object_list = []
-        return
 
     def get_raw_config(self):
-        chdir("Configs")
-        try:
-            temp = open(self.current_config + ".yaml", mode="r")
-        except Exception:
+        is_directory = exists("Configs")
+        if is_directory:
+            chdir("Configs")
+            try:
+                temp = open(self.current_config + ".yaml", mode="r")
+            except Exception:
+                chdir("..")
+                return False
+            if stat(self.current_config + ".yaml").st_size == 0:
+                chdir("..")
+                return False
+            raw = temp.readlines()
+            self.current_config_raw = raw
+            temp.close()
             chdir("..")
+            return True
+        else:
             return False
-        if stat(self.current_config + ".yaml").st_size == 0:
-            chdir("..")
-            return False
-        raw = temp.readlines()
-        self.current_config_raw = raw
-        temp.close()
-        chdir("..")
-        return True
 
     def handle_object(self, data):
         if self.current_config is not None:
             self.current_config_object_list.append(data)
-        raise NextScene("NewConfig")
 
     def remove_object(self, object_to_remove):
         while object_to_remove in self.current_config_object_list:
             self.current_config_object_list.remove(object_to_remove)
-        raise NextScene("NewConfig")
 
     def add_interface(self):
         raise NextScene("Interface")
@@ -161,7 +162,7 @@ class ConfigsFrame(InterruptFrame):
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
         layout2 = Layout([1, 3], True)
         self.add_layout(layout2)
-        self.configs_list = ListBox(5, [(["None"], None)], on_select=self._show, name="configs_list")
+        self.configs_list = ListBox(5, [("None", None)], on_select=self._show, name="configs_list")
         layout2.add_widget(self.configs_list)
         # descriptions = [("Description1", 1), ("Description2", 2), ("Description3", 3)]
         # layout2.add_widget(ListBox(3, descriptions), 1)
@@ -184,13 +185,12 @@ class ConfigsFrame(InterruptFrame):
             return
 
     def _edit(self):
-        self.save()
-        self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
-        self._model.current_config_object_list = \
-            (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
-        # except FileNotFoundError or FileExistsError:
-        #     return
-        raise NextScene("NewConfig")
+        if self.selected_config is not None:
+            self.save()
+            self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
+            self._model.current_config_object_list = \
+                (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
+            raise NextScene("NewConfig")
 
     def _delete(self):
         if self.selected_config is not None:

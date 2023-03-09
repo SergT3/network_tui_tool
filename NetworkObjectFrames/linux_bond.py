@@ -97,6 +97,7 @@ class LinuxBondFrame(InterruptFrame):
         self.fix()
 
     def _cancel(self):
+        self._model.current_network_object = {}
         raise NextScene("NewConfig")
 
     def _save_update(self):
@@ -136,20 +137,18 @@ class LinuxBondFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
-                self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
-                self.widget_dict["addresses"]._required_height += 1
+                self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
-
     def _delete_address(self):
         if self.selected_address is not None:
-            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove(([self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
+                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
@@ -157,7 +156,6 @@ class LinuxBondFrame(InterruptFrame):
                 self.widget_dict["addresses"].options = [(["None"], None)]
             self.selected_address = None
             self.fix()
-
     def _add_dns(self):
         self.widget_dict["DNSPopUp"] = PopUpDialog(self._screen, "Enter DNS servers",
                                                    ["OK", "Cancel"], on_close=self._dns_on_close)
@@ -325,7 +323,7 @@ class LinuxBondFrame(InterruptFrame):
                 self.rule_list.remove(temp_rule_dict)
                 self.widget_dict["rules"]._required_height -= 1
             if len(self.rule_list) == 0:
-                self.widget_dict["rules"]._required_height += 1
+                self.widget_dict["rules"]._required_height = 1
                 self.widget_dict["rules"].options = [(["None"], None)]
             self.selected_rule = None
             self.fix()

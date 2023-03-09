@@ -187,6 +187,7 @@ class InterfaceFrame(InterruptFrame):
             pass
 
     def _cancel(self):
+        self._model.current_network_object = {}
         raise NextScene("NewConfig")
 
     def _add_address(self):
@@ -207,8 +208,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
-                self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
-                self.widget_dict["addresses"]._required_height += 1
+                self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
@@ -391,7 +391,7 @@ class InterfaceFrame(InterruptFrame):
                 self.rule_list.remove(temp_rule_dict)
                 self.widget_dict["rules"]._required_height -= 1
             if len(self.rule_list) == 0:
-                self.widget_dict["rules"]._required_height += 1
+                self.widget_dict["rules"]._required_height = 1
                 self.widget_dict["rules"].options = [(["None"], None)]
             self.selected_rule = None
             self.fix()

@@ -75,22 +75,18 @@ class VlanFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
-                self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
-                self.widget_dict["addresses"]._required_height += 1
+                self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
-
     def _delete_address(self):
         if self.selected_address is not None:
-            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
-                "addresses"].options:
-                self.widget_dict["addresses"].options.remove(
-                    ([self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
+                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
@@ -106,8 +102,7 @@ class VlanFrame(InterruptFrame):
             # if i == default:
             # self.widget_dict["RoutePopUp"]._layouts[0].add_widget(CheckBox("", label=i, name=i))
             # error: object of type bool has no len
-            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(
-                Text(i + ":", validator=self._model.name_validator, name=i))
+            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(Text(i + ":", validator=self._model.name_validator, name=i))
         self.widget_dict["RoutePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RoutePopUp"])
 

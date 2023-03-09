@@ -21,6 +21,9 @@ class LinuxBridgeFrame(InterruptFrame):
     selected_domain = None
     selected_route = None
     selected_rule = None
+    members = []
+    available_members = []
+    members_show_list = []
 
     @staticmethod
     def get_title():
@@ -93,7 +96,13 @@ class LinuxBridgeFrame(InterruptFrame):
         layout2.add_widget(Button("Cancel", self._cancel), 3)
         self.fix()
 
+    def _on_load(self):
+        self.get_available_members()
+        for i in self.available_members:
+            self.members_show_list.append((i["name"], i))
+
     def _cancel(self):
+        self._model.current_network_object = {}
         raise NextScene("NewConfig")
 
     def _save_update(self):
@@ -133,20 +142,18 @@ class LinuxBridgeFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append(([self.widget_dict["AddressPopUp"].data["text"]],
+                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
                                                               {"ip_netmask": self.widget_dict["AddressPopUp"].data[
                                                                   "text"]}))
-                self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
-                self.widget_dict["addresses"]._required_height += 1
+                self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
-
     def _delete_address(self):
         if self.selected_address is not None:
-            while ([self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove(([self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
+                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
@@ -154,7 +161,6 @@ class LinuxBridgeFrame(InterruptFrame):
                 self.widget_dict["addresses"].options = [(["None"], None)]
             self.selected_address = None
             self.fix()
-
     def _add_dns(self):
         self.widget_dict["DNSPopUp"] = PopUpDialog(self._screen, "Enter DNS servers",
                                                    ["OK", "Cancel"], on_close=self._dns_on_close)
@@ -322,24 +328,40 @@ class LinuxBridgeFrame(InterruptFrame):
                 self.rule_list.remove(temp_rule_dict)
                 self.widget_dict["rules"]._required_height -= 1
             if len(self.rule_list) == 0:
-                self.widget_dict["rules"]._required_height += 1
+                self.widget_dict["rules"]._required_height = 1
                 self.widget_dict["rules"].options = [(["None"], None)]
             self.selected_rule = None
             self.fix()
 
+    def get_available_members(self):
+        for net_object in self._model.current_config_object_list:
+            if net_object["type"] == "interface":
+                if net_object["name"] not in self.members:
+                    self.available_devices.append({"type": "interface", "name": net_object["name"], "mtu": net_object["mtu"]})
+
+            # if net_object["type"] == "vlan":
+            #     self.available_devices.append({"type": "vlan", "device": net_object["device"],
+            #                                    "mtu": net_object["mtu"], "vlan_id": net_object["vlan_id"]})
+
     def _add_member(self):
         pass
-        # if config[i]["type"] == "interface":
-        #     self.available_devices.append({"type": "interface", "name": config[i]["name"], "mtu": config[i]["mtu"]})
-        # if config[i]["type"] == "vlan":
-        #     self.available_devices.append({"type": "vlan", "device": config[i]["device"],
-        #                                    "mtu": config[i]["mtu"], "vlan_id": config[i]["vlan_id"]})
+        # for net_object in self._model.current_config_object_list:
+        #     if net_object["type"] == "interface":
+        #         self.available_devices.append({"type": "interface", "name": config[i]["name"], "mtu": config[i]["mtu"]})
+        #     if net_object["type"] == "vlan":
+        #         self.available_devices.append({"type": "vlan", "device": config[i]["device"],
+        #                                        "mtu": config[i]["mtu"], "vlan_id": config[i]["vlan_id"]})
 
     def _member_on_close(self):
         pass
 
     def _show_member(self):
-        pass
+        for net_object in self._model.current_config_object_list:
+            if net_object["type"] == "interface":
+                self.available_devices.append({"type": "interface", "name": net_object["name"], "mtu": net_object["mtu"]})
+            if net_object["type"] == "vlan":
+                self.available_devices.append({"type": "vlan", "device": net_object["device"],
+                                               "mtu": net_object["mtu"], "vlan_id": net_object["vlan_id"]})
 
     def _delete_member(self):
         pass
