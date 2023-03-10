@@ -122,7 +122,7 @@ class NewConfigFrame(InterruptFrame):
     def _delete(self):
         if self.selected_object is not None:
             self._model.remove_object(self.selected_object)
-            self.object_list.options.remove(self.selected_object)
+            self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
             self.selected_object = None
             self.fix()
 
