@@ -10,7 +10,8 @@ def list_files(pattern):
 
 def get_interfaces():
     interface_list = netifaces.interfaces()
-    interface_list.remove('lo')
+    while "lo" in interface_list:
+        interface_list.remove("lo")
     return interface_list
 
 
@@ -62,3 +63,14 @@ def get_frame_data(frame):
             except yaml.YAMLError or KeyError:
                 return None
     return None
+
+
+def remove_empty_keys(dict_list):
+    temp_dict_list = []
+    for i in dict_list:
+        temp_dict_list.append({key: value for (key, value) in i.items()
+                               if value is not False
+                               and value != ''
+                               and value is not None
+                               and value != []})
+    return temp_dict_list

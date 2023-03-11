@@ -56,7 +56,7 @@ class NewConfigFrame(InterruptFrame):
         gap_layout3.add_widget(Divider(draw_line=False, height=3))
         layout3 = Layout([1], True)
         self.add_layout(layout3)
-        self.object_list = MultiColumnListBox(3, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
+        self.object_list = MultiColumnListBox(1, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
                                               [(["None"], None)], name="objects_list", on_select=self._show)
         layout3.add_widget(self.object_list)
         self.fix()
@@ -122,7 +122,10 @@ class NewConfigFrame(InterruptFrame):
     def _delete(self):
         if self.selected_object is not None:
             self._model.remove_object(self.selected_object)
-            self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
+            if self.selected_object["type"] == "vlan":
+                self.object_list.options.remove((["", self.selected_object["type"]], self.selected_object))
+            else:
+                self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
             self.selected_object = None
             self.fix()
 
@@ -138,7 +141,11 @@ class NewConfigFrame(InterruptFrame):
             if len(self._model.current_config_object_list) != 0:
                 self.object_list.options = []
                 for i in self._model.current_config_object_list:
-                    self.object_list.options.append(([i["name"], i["type"]], i))
+                    if i["type"] == "vlan":
+                        self.object_list.options.append((["", i["type"]], i))
+                    else:
+                        self.object_list.options.append(([i["name"], i["type"]], i))
             else:
                 self.object_list.options = [(["None"], None)]
+        self.object_list._required_height = len(self.object_list.options)
         self.fix()

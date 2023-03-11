@@ -6,7 +6,9 @@ route_titles = ["default", "destination", "next_hop", "route_table", "route_opti
 ovs_common = ["ovs_options", "ovs_extra", "ovs_fail_mode"]
 
 interface = ["ethtool_opts", "hotplug", "linkdelay"]  # + common_attributes
-vlan = ["mtu", "vlan_id", "device", "addresses", "routes"]
+
+vlan_text = ["mtu", "vlan_id"]
+vlan_list = ["device", "addresses", "routes"]
 
 linux_bridge = ["members"]  # + common_attributes
 # interfaces

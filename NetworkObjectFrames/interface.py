@@ -124,7 +124,6 @@ class InterfaceFrame(InterruptFrame):
             for i in common_list:
                 self.widget_dict[i].options = []
                 if i == "addresses":
-                    self.widget_dict[i].options = []
                     if "addresses" in self._model.current_network_object:
                         temp = []
                         for j in self.address_list:
@@ -134,19 +133,16 @@ class InterfaceFrame(InterruptFrame):
                         # self.widget_dict[i]._required_height = len(self.address_list)
                 elif i == "dns_servers":
                     if "dns_servers" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
                         for j in self.dns_list:
                             self.widget_dict[i].options.append((j, j))
                         # self.widget_dict[i]._required_height = len(self.dns_list)
                 elif i == "domain":
                     if "domain" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
                         for j in self.domain_list:
                             self.widget_dict[i].options.append((j, j))
                         # self.widget_dict[i]._required_height = len(self.domain_list)
                 elif i == "routes":
                     if "routes" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
                         for j in self.route_list:
                             temp_route_list = []
                             for k in j:
@@ -155,7 +151,6 @@ class InterfaceFrame(InterruptFrame):
                         # self.widget_dict[i]._required_height = len(self.route_list)
                 elif i == "rules":
                     if "rules" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
                         for j in self.rule_list:
                             temp_rule_list = []
                             for k in j:

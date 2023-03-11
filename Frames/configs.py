@@ -6,7 +6,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
 from interruptframe import InterruptFrame
-from utils import list_files, to_asciimatics_list, write_to_file, read_dict_from_yaml
+from utils import list_files, to_asciimatics_list, write_to_file, read_dict_from_yaml,remove_empty_keys
 
 
 class ConfigsModel(object):
@@ -45,7 +45,7 @@ class ConfigsModel(object):
         temp = open(self.current_config + ".yaml", "w")
         temp.close()
         chdir("..")
-        write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": self.current_config_object_list})
+        write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": remove_empty_keys(self.current_config_object_list)})
         self.current_config = None
         self.current_config_object_list = []
         return
@@ -162,7 +162,7 @@ class ConfigsFrame(InterruptFrame):
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
         layout2 = Layout([1, 3], True)
         self.add_layout(layout2)
-        self.configs_list = ListBox(5, [("None", None)], on_select=self._show, name="configs_list")
+        self.configs_list = ListBox(1, [("None", None)], on_select=self._show, name="configs_list")
         layout2.add_widget(self.configs_list)
         # descriptions = [("Description1", 1), ("Description2", 2), ("Description3", 3)]
         # layout2.add_widget(ListBox(3, descriptions), 1)
@@ -200,6 +200,7 @@ class ConfigsFrame(InterruptFrame):
 
     def _on_load(self):
         self.configs_list.options = self._model.get_configs()
+        self.configs_list._required_height = len(self.configs_list.options)
 
     def _show(self):
         self.save()
