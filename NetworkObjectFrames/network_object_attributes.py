@@ -16,7 +16,7 @@ linux_bridge = ["members"]  # + common_attributes
 linux_bond = ["members", "bonding_options"]  # + common_attributes
 # interfaces
 
-ovs_bridge = ["members*"]  # + common_attributes + common_ovs_attributes
+ovs_bridge = ["members"]  # + common_attributes + common_ovs_attributes
 # interface
 #
 # linux_bond

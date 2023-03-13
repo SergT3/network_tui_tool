@@ -1,10 +1,10 @@
 from copy import deepcopy
 
 from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Text, Button, CheckBox, ListBox, MultiColumnListBox, PopUpDialog, DropdownList
+from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog, DropdownList
 
-from NetworkObjectFrames.network_object_attributes import linux_bridge, common_check, common_text, common_list
 from NetworkObjectFrames.interface import InterfaceFrame
+from NetworkObjectFrames.network_object_attributes import linux_bridge
 
 
 class LinuxBridgeFrame(InterfaceFrame):
@@ -25,50 +25,7 @@ class LinuxBridgeFrame(InterfaceFrame):
         object_type = Text(label="type", name="type", readonly=True)
         object_type.value = "linux_bridge"
         self.layout1.add_widget(object_type)
-        for i in common_text:
-            self.widget_dict[i] = Text(label=i, name=i)
-            self.layout1.add_widget(self.widget_dict[i])
-        for i in common_check:
-            self.widget_dict[i] = CheckBox("", label=i, name=i)
-            self.layout1.add_widget(self.widget_dict[i])
-        for i in common_list:
-            if i == "addresses":
-                self.layout1.add_widget(Button("Add address", self._add_address))
-                self.layout1.add_widget(Button("Delete address", self._delete_address))
-                self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 3 + 1, self._screen.width // 3 - 1],
-                                                         [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i,
-                                                         on_select=self._show_address)
-                self.layout1.add_widget(self.widget_dict[i])
-            elif i == "dns_servers":
-                self.layout1.add_widget(Button("Add DNS server", self._add_dns))
-                self.layout1.add_widget(Button("Delete DNS server", self._delete_dns))
-                self.widget_dict[i] = ListBox(1, [("None", None)], label=i, name=i, on_select=self._show_dns)
-                self.layout1.add_widget(self.widget_dict[i])
-            elif i == "domain":
-                self.layout1.add_widget(Button("Add domain", self._add_domain))
-                self.layout1.add_widget(Button("Delete domain", self._delete_domain))
-                self.widget_dict[i] = ListBox(1, [("None", None)], label=i, name=i, on_select=self._show_domain)
-                self.layout1.add_widget(self.widget_dict[i])
-            elif i == "routes":
-                self.layout1.add_widget(Button("Add route", self._add_route))
-                self.layout1.add_widget(Button("Delete route", self._delete_route))
-                self.widget_dict[i] = MultiColumnListBox(1,
-                                                         [self._screen.width // 5 + 1, self._screen.width // 5 + 1,
-                                                          self._screen.width // 5 + 1, self._screen.width // 5 + 1,
-                                                          self._screen.width // 5 - 4],
-                                                         [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i,
-                                                         on_select=self._show_route)
-                self.layout1.add_widget(self.widget_dict[i])
-            elif i == "rules":
-                self.layout1.add_widget(Button("Add rule", self._add_rule))
-                self.layout1.add_widget(Button("Delete rule", self._delete_rule))
-                self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
-                                                         [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i,
-                                                         on_select=self._show_rule)
-                self.layout1.add_widget(self.widget_dict[i])
+        self.add_common_attr()
         for i in linux_bridge:
             if i == "members":
                 self.layout1.add_widget(Button("Add member", self._add_member))
@@ -98,82 +55,25 @@ class LinuxBridgeFrame(InterfaceFrame):
         else:
             self.pop_up_members = [("None", None)]
 
+        self.fill_common_attr()
         if self._model.current_network_object == {}:
-            for i in common_text:
-                self.widget_dict[i].value = ""
-            for i in common_check:
-                self.widget_dict[i].value = False
-            for i in common_list:
-                if i == "dns_servers" or i == "domain":
-                    self.widget_dict[i].options = [("None", None)]
-                else:
-                    self.widget_dict[i].options = [(["None"], None)]
             for i in linux_bridge:
                 if i == "members":
                     self.widget_dict[i].options = [(["None"], None)]
         else:
-            if "addresses" in self._model.current_network_object:
-                self.address_list = self._model.current_network_object["addresses"]
-            if "dns_servers" in self._model.current_network_object:
-                self.dns_list = self._model.current_network_object["dns_servers"]
-            if "domain" in self._model.current_network_object:
-                self.domain_list = self._model.current_network_object["domain"]
-            if "routes" in self._model.current_network_object:
-                self.route_list = self._model.current_network_object["routes"]
-            if "rules" in self._model.current_network_object:
-                self.rule_list = self._model.current_network_object["rules"]
             if "members" in self._model.current_network_object:
                 self.member_list = self._model.current_network_object["members"]
 
-            for i in common_text + common_check:
-                self.data[i] = self._model.current_network_object[i]
-                self.widget_dict[i].value = self._model.current_network_object[i]
-            for i in common_list + linux_bridge:
-                self.widget_dict[i].options = []
-                if i == "addresses":
-                    self.widget_dict[i].options = []
-                    if "addresses" in self._model.current_network_object:
-                        temp = []
-                        for j in self.address_list:
-                            temp.append((["ip_netmask:", j["ip_netmask"]],
-                                         {"ip_netmask": j["ip_netmask"]}))
-                        self.widget_dict[i].options = temp
-                        # self.widget_dict[i]._required_height = len(self.address_list)
-                elif i == "dns_servers":
-                    if "dns_servers" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
-                        for j in self.dns_list:
-                            self.widget_dict[i].options.append((j, j))
-                        # self.widget_dict[i]._required_height = len(self.dns_list)
-                elif i == "domain":
-                    if "domain" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
-                        for j in self.domain_list:
-                            self.widget_dict[i].options.append((j, j))
-                        # self.widget_dict[i]._required_height = len(self.domain_list)
-                elif i == "routes":
-                    if "routes" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
-                        for j in self.route_list:
-                            temp_route_list = []
-                            for k in j:
-                                temp_route_list.append(j[k])
-                            self.widget_dict[i].options.append((temp_route_list, temp_route_list))
-                        # self.widget_dict[i]._required_height = len(self.route_list)
-                elif i == "rules":
-                    if "rules" in self._model.current_network_object:
-                        self.widget_dict[i].options = []
-                        for j in self.rule_list:
-                            temp_rule_list = []
-                            for k in j:
-                                temp_rule_list.append(j[k])
-                            self.widget_dict[i].options.append((temp_rule_list, temp_rule_list))
-                        # self.widget_dict[i]._required_height = len(self.rule_list)
-                elif i == "members":
+            for i in linux_bridge:
+                if i == "members":
                     if "members" in self._model.current_network_object:
                         self.widget_dict[i].options = []
-                        for j in self.member_list:
-                            self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
+                        if self.member_list is not None and len(self.member_list) != 0:
+                            for j in self.member_list:
+                                self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
+                        else:
+                            self.widget_dict[i]._required_height = 1
+                            self.widget_dict[i].options = [(["None"], None)]
                         # self.widget_dict[i]._required_height = len(self.rule_list)
         self.fix()
 
@@ -189,8 +89,6 @@ class LinuxBridgeFrame(InterfaceFrame):
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
-        else:
-            pass
 
     def get_available_members(self):
         if len(self._model.current_config_object_list) != 0:

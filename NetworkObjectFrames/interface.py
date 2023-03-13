@@ -8,9 +8,6 @@ from NetworkObjectFrames.network_object_attributes import common_text, common_ch
 from interruptframe import InterruptFrame
 
 
-# class InterfaceModel(object):
-#     pass
-
 class InterfaceFrame(InterruptFrame):
     opt_data = None
     address_list = []
@@ -35,6 +32,43 @@ class InterfaceFrame(InterruptFrame):
         object_type = Text(label="type", name="type", readonly=True)
         object_type.value = "interface"
         self.layout1.add_widget(object_type)
+        self.add_common_attr()
+        for i in interface:
+            if i == "hotplug":
+                self.widget_dict[i] = CheckBox("", label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
+            else:
+                self.widget_dict[i] = Text(label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
+        layout2 = Layout([1, 1, 1, 1])
+        self.add_layout(layout2)
+        layout2.add_widget(Button("Save", self._save_update))
+        layout2.add_widget(Button("Cancel", self._cancel), 3)
+        self.fix()
+
+    def _on_load(self):
+        self.fill_common_attr()
+        if self._model.current_network_object == {}:
+            for i in interface:
+                if i == "hotplug":
+                    self.widget_dict[i].value = False
+                else:
+                    self.widget_dict[i].value = ""
+        else:
+            for i in interface:
+                if i == "hotplug":
+                    if i in self._model.current_network_object:
+                        self.widget_dict[i].value = self._model.current_network_object[i]
+                    else:
+                        self.widget_dict[i].value = False
+                else:
+                    if i in self._model.current_network_object:
+                        self.widget_dict[i].value = self._model.current_network_object[i]
+                    else:
+                        self.widget_dict[i].value = ""
+        self.fix()
+
+    def add_common_attr(self):
         for i in common_text:
             self.widget_dict[i] = Text(label=i, name=i)
             self.layout1.add_widget(self.widget_dict[i])
@@ -47,7 +81,8 @@ class InterfaceFrame(InterruptFrame):
                 self.layout1.add_widget(Button("Delete address", self._delete_address))
                 self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 3 + 1, self._screen.width // 3 - 1],
                                                          [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i, on_select=self._show_address)
+                                                         add_scroll_bar=True, label=i, name=i,
+                                                         on_select=self._show_address)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "dns_servers":
                 self.layout1.add_widget(Button("Add DNS server", self._add_dns))
@@ -67,29 +102,19 @@ class InterfaceFrame(InterruptFrame):
                                                           self._screen.width // 5 + 1, self._screen.width // 5 + 1,
                                                           self._screen.width // 5 - 4],
                                                          [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i, on_select=self._show_route)
+                                                         add_scroll_bar=True, label=i, name=i,
+                                                         on_select=self._show_route)
                 self.layout1.add_widget(self.widget_dict[i])
             elif i == "rules":
                 self.layout1.add_widget(Button("Add rule", self._add_rule))
                 self.layout1.add_widget(Button("Delete rule", self._delete_rule))
                 self.widget_dict[i] = MultiColumnListBox(1, [self._screen.width // 2 + 1, self._screen.width // 2 - 1],
                                                          [(["None"], None)],
-                                                         add_scroll_bar=True, label=i, name=i, on_select=self._show_rule)
+                                                         add_scroll_bar=True, label=i, name=i,
+                                                         on_select=self._show_rule)
                 self.layout1.add_widget(self.widget_dict[i])
-        for i in interface:
-            if i == "hotplug":
-                self.widget_dict[i] = CheckBox("", label=i, name=i)
-                self.layout1.add_widget(self.widget_dict[i])
-            else:
-                self.widget_dict[i] = Text(label=i, name=i)
-                self.layout1.add_widget(self.widget_dict[i])
-        layout2 = Layout([1, 1, 1, 1])
-        self.add_layout(layout2)
-        layout2.add_widget(Button("Save", self._save_update))
-        layout2.add_widget(Button("Cancel", self._cancel), 3)
-        self.fix()
 
-    def _on_load(self):
+    def fill_common_attr(self):
         if self._model.current_network_object == {}:
             for i in common_text:
                 self.widget_dict[i].value = ""
@@ -99,13 +124,8 @@ class InterfaceFrame(InterruptFrame):
                 if i == "dns_servers" or i == "domain":
                     self.widget_dict[i].options = [("None", None)]
                 else:
-
                     self.widget_dict[i].options = [(["None"], None)]
-            for i in interface:
-                if i == "hotplug":
-                    self.widget_dict[i].value = False
-                else:
-                    self.widget_dict[i].value = ""
+
         else:
             if "addresses" in self._model.current_network_object:
                 self.address_list = self._model.current_network_object["addresses"]
@@ -118,9 +138,18 @@ class InterfaceFrame(InterruptFrame):
             if "rules" in self._model.current_network_object:
                 self.rule_list = self._model.current_network_object["rules"]
 
-            for i in common_text + common_check:
-                self.data[i] = self._model.current_network_object[i]
-                self.widget_dict[i].value = self._model.current_network_object[i]
+            for i in common_text:
+                if i in self._model.current_network_object:
+                    self.data[i] = self._model.current_network_object[i]
+                    self.widget_dict[i].value = self._model.current_network_object[i]
+                else:
+                    self.widget_dict[i].value = ""
+            for i in common_check:
+                if i in self._model.current_network_object:
+                    self.data[i] = self._model.current_network_object[i]
+                    self.widget_dict[i].value = self._model.current_network_object[i]
+                else:
+                    self.widget_dict[i].value = False
             for i in common_list:
                 self.widget_dict[i].options = []
                 if i == "addresses":
@@ -131,15 +160,24 @@ class InterfaceFrame(InterruptFrame):
                                          {"ip_netmask": j["ip_netmask"]}))
                         self.widget_dict[i].options = temp
                         # self.widget_dict[i]._required_height = len(self.address_list)
+                    else:
+                        self.widget_dict[i].options = [(["None"], None)]
+                        self.widget_dict[i]._required_height = 1
                 elif i == "dns_servers":
                     if "dns_servers" in self._model.current_network_object:
                         for j in self.dns_list:
                             self.widget_dict[i].options.append((j, j))
+                    else:
+                        self.widget_dict[i].options = [("None", None)]
+                        self.widget_dict[i]._required_height = 1
                         # self.widget_dict[i]._required_height = len(self.dns_list)
                 elif i == "domain":
                     if "domain" in self._model.current_network_object:
                         for j in self.domain_list:
                             self.widget_dict[i].options.append((j, j))
+                    else:
+                        self.widget_dict[i]._required_height = 1
+                        self.widget_dict[i].options = [("None", None)]
                         # self.widget_dict[i]._required_height = len(self.domain_list)
                 elif i == "routes":
                     if "routes" in self._model.current_network_object:
@@ -149,6 +187,9 @@ class InterfaceFrame(InterruptFrame):
                                 temp_route_list.append(j[k])
                             self.widget_dict[i].options.append((temp_route_list, temp_route_list))
                         # self.widget_dict[i]._required_height = len(self.route_list)
+                    else:
+                        self.widget_dict[i]._required_height = 1
+                        self.widget_dict[i].options = [(["None"], None)]
                 elif i == "rules":
                     if "rules" in self._model.current_network_object:
                         for j in self.rule_list:
@@ -156,8 +197,12 @@ class InterfaceFrame(InterruptFrame):
                             for k in j:
                                 temp_rule_list.append(j[k])
                             self.widget_dict[i].options.append((temp_rule_list, temp_rule_list))
+                    else:
+                        self.widget_dict[i]._required_height = 1
+                        self.widget_dict[i].options = [(["None"], None)]
                         # self.widget_dict[i]._required_height = len(self.rule_list)
         self.fix()
+
 
     def _save_update(self):
         self.save()
@@ -178,8 +223,6 @@ class InterfaceFrame(InterruptFrame):
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
-        else:
-            pass
 
     def _cancel(self):
         self._model.current_network_object = {}
@@ -280,7 +323,7 @@ class InterfaceFrame(InterruptFrame):
             self.fix()
 
     def _show_domain(self):
-        self.selected_domain = self.widget_dict["domain"].value
+        self.selected_option = self.widget_dict["domain"].value
 
     def _delete_domain(self):
         if self.selected_domain is not None:

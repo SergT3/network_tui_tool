@@ -109,8 +109,6 @@ class VlanFrame(InterruptFrame):
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
-        else:
-            pass
 
     def _save_update(self):
         self.save()

@@ -1,6 +1,5 @@
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
-from utils import read_dict_from_yaml, exists
 
 from interruptframe import InterruptFrame
 

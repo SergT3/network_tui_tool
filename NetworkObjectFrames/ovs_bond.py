@@ -4,11 +4,6 @@ from asciimatics.widgets import Layout, Text, Button, CheckBox
 from NetworkObjectFrames.network_object_attributes import ovs_bond, common_check, common_text, common_list, ovs_common
 from interruptframe import InterruptFrame
 
-
-class OVSBondModel(object):
-    pass
-
-
 class OVSBondFrame(InterruptFrame):
 
     @staticmethod
