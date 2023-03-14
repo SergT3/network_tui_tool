@@ -48,6 +48,7 @@ class LinuxBridgeFrame(InterfaceFrame):
             for i in self.available_members:
                 self.pop_up_members.append((i["name"], {"type": "interface", "name": i["name"], "mtu": i["mtu"]}))
             if len(self.member_list):
+                self.pop_up_members = []
                 for i in self.pop_up_members:
                     for j in self.member_list:
                         if i[1]["type"] == j["type"] and i[1]["name"] == j["name"]:

@@ -2,6 +2,7 @@ from os import mkdir, chdir, remove, stat
 from os.path import exists
 
 import touch
+import yaml
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
@@ -82,21 +83,8 @@ class ConfigsModel(object):
         self.current_config_object_list = []
 
     def get_raw_config(self):
-        is_directory = exists("Configs")
-        if is_directory:
-            chdir("Configs")
-            try:
-                temp = open(self.current_config + ".yaml", mode="r")
-            except Exception:
-                chdir("..")
-                return False
-            if stat(self.current_config + ".yaml").st_size == 0:
-                chdir("..")
-                return False
-            raw = temp.readlines()
-            self.current_config_raw = raw
-            temp.close()
-            chdir("..")
+        if self.current_config_object_list:
+            self.current_config_raw = yaml.dump(self.current_config_object_list)
             return True
         else:
             return False

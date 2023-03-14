@@ -51,6 +51,7 @@ class OVSBondFrame(LinuxBondFrame):
             self.opt_data["domain"] = self.ovs_extra_list
             self.opt_data["routes"] = self.route_list
             self.opt_data["rules"] = self.rule_list
+            self.opt_data["members"] = self.member_list
             self.opt_data["ovs_extra"] = self.ovs_extra_list
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
@@ -61,26 +62,7 @@ class OVSBondFrame(LinuxBondFrame):
 
     def _on_load(self):
         super()._on_load()
-        if self._model.current_network_object == {}:
-            for i in ovs_common:
-                if i == "ovs_extra":
-                    self.widget_dict[i].options = [("None", None)]
-                else:
-                    self.widget_dict[i].value = ""
-        else:
-            if "ovs_extra" in self._model.current_network_object:
-                self.ovs_extra_list = self._model.current_network_object["ovs_extra"]
-            for i in ovs_common:
-                if i in self._model.current_network_object:
-                    if i == "ovs_extra":
-                        if "ovs_extra" in self._model.current_network_object:
-                            self.widget_dict[i].options = []
-                            for j in self.ovs_extra_list:
-                                self.widget_dict[i].options.append((j, j))
-                    else:
-                        self.data[i] = self._model.current_network_object[i]
-                        self.widget_dict[i].value = self._model.current_network_object[i]
-        self.fix()
+        self.fill_ovs_common_attr()
 
     def _add_option(self):
         self.widget_dict["OptionPopUp"] = PopUpDialog(self._screen, "Enter new option",

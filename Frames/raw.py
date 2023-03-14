@@ -26,4 +26,5 @@ class RawFrame(InterruptFrame):
             self.text_box.value = ""
 
     def _cancel(self):
+        self._model.current_config_raw = None
         raise NextScene("NewConfig")
