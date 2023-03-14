@@ -1,35 +1,47 @@
-from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Text, Button, CheckBox
+from asciimatics.widgets import Layout, Text, Button
 
-from NetworkObjectFrames.network_object_attributes import ovs_dpdk_port, common_check, \
-    common_text, common_list, ovs_common
-from interruptframe import InterruptFrame
+from NetworkObjectFrames.network_object_attributes import ovs_dpdk_port
+from NetworkObjectFrames.ovs_dpdk_bond import OVSDpdkBondFrame
 
 
-class OVSDpdkPortModel(object):
-    pass
-
-
-class OVSDpdkPortFrame(InterruptFrame):
+class OVSDpdkPortFrame(OVSDpdkBondFrame):
 
     @staticmethod
     def get_title():
         return "OVSDpdkPort"
 
     def init_layout(self):
-        layout1 = Layout([1, 1, 1, 1], True)
-        self.add_layout(layout1)
+        self.layout1 = Layout([1, 1, 1, 1], True)
+        self.add_layout(self.layout1)
+        self.widget_dict = {}
+        object_type = Text(label="type", name="type", readonly=True)
+        object_type.value = "ovs_dpdk_port"
+        self.layout1.add_widget(object_type)
+        self.add_common_attr()
+        self.add_ovs_common_attr()
         for i in ovs_dpdk_port:
-            if i == "members*":
-                continue
-        for i in common_text + ovs_common:
-            layout1.add_widget(Text(label=i, name=i))
-        for i in common_check:
-            layout1.add_widget(CheckBox("", label=i, name=i))
+            if i != "members":
+                self.widget_dict[i] = Text(label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
         layout2 = Layout([1, 1, 1, 1])
         self.add_layout(layout2)
         layout2.add_widget(Button("Cancel", self._cancel))
         self.fix()
 
-    def _cancel(self):
-        raise NextScene("NewConfig")
+    def _on_load(self):
+        super()._on_load()
+        if self._model.current_network_object == {}:
+            self.widget_dict["driver"].value = ""
+        else:
+            if "driver" in self._model.current_network_object:
+                self.widget_dict["driver"] = self._model.current_network_object["driver"]
+            else:
+                self.widget_dict["device"].value = ""
+
+    def get_available_members(self):
+        if len(self._model.current_config_object_list):
+            for net_object in self._model.current_config_object_list:
+                if net_object["type"] == "interface":
+                    if net_object["name"] not in self.member_list:
+                        self.available_members.append(
+                            {"type": "interface", "name": net_object["name"]})

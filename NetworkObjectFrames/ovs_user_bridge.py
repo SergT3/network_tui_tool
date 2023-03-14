@@ -2,14 +2,10 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, CheckBox
 
 from NetworkObjectFrames.network_object_attributes import ovs_user_bridge, common_check, common_text, common_list, ovs_common
-from interruptframe import InterruptFrame
+from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame
 
 
-class OVSUserBridgeModel(object):
-    pass
-
-
-class OVSUserBridgeFrame(InterruptFrame):
+class OVSUserBridgeFrame(OVSBridgeFrame):
 
     @staticmethod
     def get_title():
@@ -26,6 +22,3 @@ class OVSUserBridgeFrame(InterruptFrame):
         self.add_layout(layout2)
         layout2.add_widget(Button("Cancel", self._cancel))
         self.fix()
-
-    def _cancel(self):
-        raise NextScene("NewConfig")

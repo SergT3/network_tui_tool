@@ -1,10 +1,10 @@
 from copy import deepcopy
 
 from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, ListBox, MultiColumnListBox
+from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, ListBox, MultiColumnListBox, DropdownList
 
-from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, interface, \
-    route_titles
+from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
+    interface, route_titles
 from interruptframe import InterruptFrame
 
 
@@ -114,6 +114,20 @@ class InterfaceFrame(InterruptFrame):
                                                          on_select=self._show_rule)
                 self.layout1.add_widget(self.widget_dict[i])
 
+    def add_ovs_common_attr(self):
+        for i in ovs_common:
+            if i == "ovs_options":
+                self.widget_dict[i] = Text(label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
+            elif i == "ovs_extra":
+                self.layout1.add_widget(Button("Add extra option", self._add_option))
+                self.layout1.add_widget(Button("Delete extra option", self._delete_option))
+                self.widget_dict[i] = ListBox(1, [("None", None)], label=i, name=i, on_select=self._show_option)
+                self.layout1.add_widget(self.widget_dict[i])
+            elif i == "ovs_fail_mode":
+                self.widget_dict[i] = DropdownList([("standard", "standard"), ("secure", "secure")], label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
+
     def fill_common_attr(self):
         if self._model.current_network_object == {}:
             for i in common_text:
@@ -203,7 +217,6 @@ class InterfaceFrame(InterruptFrame):
                         # self.widget_dict[i]._required_height = len(self.rule_list)
         self.fix()
 
-
     def _save_update(self):
         self.save()
         # write_to_file("data_value_old", self.data)
@@ -220,12 +233,16 @@ class InterfaceFrame(InterruptFrame):
             self.opt_data["domain"] = self.domain_list
             self.opt_data["routes"] = self.route_list
             self.opt_data["rules"] = self.rule_list
+            if self._model.edit_mode:
+                self._model.current_config_object_list.remove(self._model.current_network_object)
+            self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
 
     def _cancel(self):
         self._model.current_network_object = {}
+        self._model.edit_mode = False
         raise NextScene("NewConfig")
 
     def _add_address(self):
@@ -240,28 +257,33 @@ class InterfaceFrame(InterruptFrame):
         if choice == 0:
             self.widget_dict["AddressPopUp"].save()
             self.address_list.append({"ip_netmask": self.widget_dict["AddressPopUp"].data["text"]})
-            if len(self.address_list) != 0:
+            if len(self.address_list):
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
-                                                              {"ip_netmask": self.widget_dict["AddressPopUp"].data[
-                                                                  "text"]}))
+                self.widget_dict["addresses"].options.append(
+                    (["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
+                     {"ip_netmask": self.widget_dict["AddressPopUp"].data[
+                         "text"]}))
                 self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
+
     def _delete_address(self):
         if self.selected_address is not None:
-            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
+                "addresses"].options:
+                self.widget_dict["addresses"].options.remove(
+                    (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
-            if len(self.address_list) == 0:
+            if not len(self.address_list):
                 self.widget_dict["addresses"]._required_height = 1
                 self.widget_dict["addresses"].options = [(["None"], None)]
             self.selected_address = None
             self.fix()
+
     def _add_dns(self):
         self.widget_dict["DNSPopUp"] = PopUpDialog(self._screen, "Enter DNS servers",
                                                    ["OK", "Cancel"], on_close=self._dns_on_close)
@@ -280,7 +302,7 @@ class InterfaceFrame(InterruptFrame):
             for i in self.dns_list:
                 if i == "":
                     self.dns_list.remove(i)
-            if len(self.dns_list) != 0:
+            if len(self.dns_list):
                 self.widget_dict["dns_servers"].options = []
                 for i in self.dns_list:
                     self.widget_dict["dns_servers"].options.append((i, i))
@@ -296,7 +318,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["dns_servers"].options.remove((self.selected_dns, self.selected_dns))
                 self.dns_list.remove(self.selected_dns)
                 self.widget_dict["dns_servers"]._required_height -= 1
-            if len(self.dns_list) == 0:
+            if not len(self.dns_list):
                 self.widget_dict["dns_servers"]._required_height = 1
                 self.widget_dict["dns_servers"].options = [("None", None)]
             self.selected_dns = None
@@ -314,7 +336,7 @@ class InterfaceFrame(InterruptFrame):
         if choice == 0:
             self.widget_dict["DomainPopUp"].save()
             self.domain_list.append(self.widget_dict["DomainPopUp"].data["text"])
-            if len(self.domain_list) != 0:
+            if len(self.domain_list):
                 if self.widget_dict["domain"].options == [("None", None)]:
                     self.widget_dict["domain"].options = []
                 self.widget_dict["domain"].options.append((self.widget_dict["DomainPopUp"].data["text"],
@@ -331,7 +353,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["domain"].options.remove((self.selected_domain, self.selected_domain))
                 self.domain_list.remove(self.selected_domain)
                 self.widget_dict["domain"]._required_height -= 1
-            if len(self.domain_list) == 0:
+            if not len(self.domain_list):
                 self.widget_dict["domain"]._required_height = 1
                 self.widget_dict["domain"].options = [("None", None)]
             self.selected_domain = None
@@ -344,7 +366,8 @@ class InterfaceFrame(InterruptFrame):
             # if i == default:
             # self.widget_dict["RoutePopUp"]._layouts[0].add_widget(CheckBox("", label=i, name=i))
             # error: object of type bool has no len
-            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(Text(i + ":", validator=self._model.name_validator, name=i))
+            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(
+                Text(i + ":", validator=self._model.name_validator, name=i))
         self.widget_dict["RoutePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RoutePopUp"])
 
@@ -379,7 +402,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["routes"].options.remove((self.selected_route, self.selected_route))
                 self.route_list.remove(temp_route_dict)
                 self.widget_dict["routes"]._required_height -= 1
-            if len(self.route_list) == 0:
+            if not len(self.route_list):
                 self.widget_dict["routes"]._required_height = 1
                 self.widget_dict["routes"].options = [(["None"], None)]
             self.selected_route = None
@@ -394,11 +417,11 @@ class InterfaceFrame(InterruptFrame):
                                                                   name="comment"))
         self.widget_dict["RulePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RulePopUp"])
+
     def _rule_on_close(self, choice):
         if choice == 0:
             self.widget_dict["RulePopUp"].save()
             if self.widget_dict["RulePopUp"].data["rule"] != "":
-                rule_dict = {}
                 temp_rule_list = []
                 if self.widget_dict["RulePopUp"].data["comment"] != "":
                     rule_dict = {"rule": self.widget_dict["RulePopUp"].data["rule"],
@@ -428,7 +451,7 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["rules"].options.remove((self.selected_rule, self.selected_rule))
                 self.rule_list.remove(temp_rule_dict)
                 self.widget_dict["rules"]._required_height -= 1
-            if len(self.rule_list) == 0:
+            if not len(self.rule_list):
                 self.widget_dict["rules"]._required_height = 1
                 self.widget_dict["rules"].options = [(["None"], None)]
             self.selected_rule = None

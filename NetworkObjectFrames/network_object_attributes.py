@@ -18,23 +18,19 @@ linux_bond = ["members", "bonding_options"]  # + common_attributes
 
 ovs_bridge = ["members"]  # + common_attributes + common_ovs_attributes
 # interface
-#
 # linux_bond
-#
 # ovs_bond
-#
 # vlan
-#
 # other OpenvSwitch internal interfaces
 
-ovs_bond = ["members*"]  # + common_attributes + common_ovs_attributes
+ovs_bond = ["members"]  # + common_attributes + common_ovs_attributes
 # interfaces
 
-ovs_user_bridge = ["members*"]  # + common_attributes + common_ovs_attributes
+ovs_user_bridge = ["members"]  # + common_attributes + common_ovs_attributes
 # usually 1 ovs_dpdk_bond
 
-ovs_dpdk_bond = ["members*", "rx_queue"]  # + common_attributes + common_ovs_attributes
+ovs_dpdk_bond = ["members", "rx_queue"]  # + common_attributes + common_ovs_attributes
 # list of ovs_dpdk_port
 
-ovs_dpdk_port = ["members*", "rx_queue", "driver"]  # + common_attributes + common_ovs_attributes
+ovs_dpdk_port = ["members", "rx_queue", "driver"]  # + common_attributes + common_ovs_attributes
 # 1 interface

@@ -44,10 +44,10 @@ class LinuxBridgeFrame(InterfaceFrame):
 
     def _on_load(self):
         self.get_available_members()
-        if len(self.available_members) != 0:
+        if len(self.available_members):
             for i in self.available_members:
                 self.pop_up_members.append((i["name"], {"type": "interface", "name": i["name"], "mtu": i["mtu"]}))
-            if len(self.member_list) != 0:
+            if len(self.member_list):
                 for i in self.pop_up_members:
                     for j in self.member_list:
                         if i[1]["type"] == j["type"] and i[1]["name"] == j["name"]:
@@ -68,7 +68,7 @@ class LinuxBridgeFrame(InterfaceFrame):
                 if i == "members":
                     if "members" in self._model.current_network_object:
                         self.widget_dict[i].options = []
-                        if self.member_list is not None and len(self.member_list) != 0:
+                        if self.member_list is not None and len(self.member_list):
                             for j in self.member_list:
                                 self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
                         else:
@@ -86,12 +86,15 @@ class LinuxBridgeFrame(InterfaceFrame):
             self.opt_data["routes"] = self.route_list
             self.opt_data["rules"] = self.rule_list
             self.opt_data["members"] = self.member_list
+            if self._model.edit_mode:
+                self._model.current_config_object_list.remove(self._model.current_network_object)
+            self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
 
     def get_available_members(self):
-        if len(self._model.current_config_object_list) != 0:
+        if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
                 if net_object["type"] == "interface":
                     if net_object["name"] not in self.member_list:
@@ -145,7 +148,7 @@ class LinuxBridgeFrame(InterfaceFrame):
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
-            if len(self.member_list) == 0:
+            if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1
                 self.widget_dict["members"].options = [(["None"], None)]
             self.selected_member = None

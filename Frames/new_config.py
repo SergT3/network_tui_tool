@@ -62,6 +62,8 @@ class NewConfigFrame(InterruptFrame):
 
     def _on_load(self):
         self.update_object_list()
+        self.ovs_box.value = False
+        self.linux_box.value = False
 
     def _show(self):
         self.save()
@@ -82,8 +84,8 @@ class NewConfigFrame(InterruptFrame):
         if self.selected_object is not None:
             for i in self._model.current_config_object_list:
                 if i == self.selected_object:
+                    self._model.edit_mode = True
                     self._model.current_network_object = i
-                    self._model.current_config_object_list.remove(i)
                     temp_name = self._model.current_network_object["type"]
                     if temp_name == "interface":
                         raise NextScene("Interface")
@@ -137,7 +139,7 @@ class NewConfigFrame(InterruptFrame):
             self.config_name.text = self._model.current_config
             # chdir("Configs")
             # object_dict = read_dict_from_yaml(self._model.current_config + ".yaml")
-            if len(self._model.current_config_object_list) != 0:
+            if len(self._model.current_config_object_list):
                 self.object_list.options = []
                 for i in self._model.current_config_object_list:
                     if i["type"] == "vlan":

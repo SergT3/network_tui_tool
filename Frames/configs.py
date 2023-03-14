@@ -18,7 +18,7 @@ class ConfigsModel(object):
     _linux_checkbox = False
     _delete_list = []
     current_network_object = {}  # opt_data
-
+    edit_mode = False
     # Methods for Configs
     @staticmethod
     def get_configs():
@@ -102,7 +102,7 @@ class ConfigsModel(object):
             return False
 
     def handle_object(self, data):
-        if self.current_config is not None:
+        if self.current_config is not None and data is not None:
             self.current_config_object_list.append(data)
 
     def remove_object(self, object_to_remove):
