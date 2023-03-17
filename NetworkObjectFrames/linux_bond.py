@@ -49,17 +49,19 @@ class LinuxBondFrame(InterfaceFrame):
         self.get_available_members()
         if len(self.available_members):
             for i in self.available_members:
-                self.pop_up_members.append((i["name"], {"type": "interface", "name": i["name"], "mtu": i["mtu"]}))
+                if i["type"] == "vlan":
+                    self.pop_up_members.append((i["vlan_id"], i))
+                else:
+                    self.pop_up_members.append((i["name"], i))
             if len(self.member_list):
-                self.pop_up_members = []
                 for i in self.pop_up_members:
-                    for j in self.member_list:
-                        if i[1]["type"] == j["type"] and i[1]["name"] == j["name"]:
-                            self.pop_up_members.remove(i)
+                    if i[1] in self.member_list:
+                        self.pop_up_members.remove(i)
         else:
             self.pop_up_members = [("None", None)]
 
         self.fill_common_attr()
+
         if self._model.current_network_object == {}:
             for i in linux_bond:
                 if i == "members":
@@ -77,8 +79,11 @@ class LinuxBondFrame(InterfaceFrame):
                         self.widget_dict[i].options = []
                         if self.member_list is not None and len(self.member_list):
                             for j in self.member_list:
-                                self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
-                        # self.widget_dict[i]._required_height = len(self.rule_list)
+                                if j["type"] == "vlan":
+                                    self.widget_dict[i].options.append(([j["vlan_id"], j["type"], j["mtu"]], j))
+                                else:
+                                    self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
+                            self.widget_dict[i]._required_height = len(self.member_list)
                     else:
                         self.widget_dict[i]._required_height = 1
                         self.widget_dict[i].options = [(["None"], None)]
@@ -95,12 +100,12 @@ class LinuxBondFrame(InterfaceFrame):
     def _on_close(self, choice):
         if choice == 0:
             self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = self.address_list
-            self.opt_data["dns_servers"] = self.dns_list
-            self.opt_data["domain"] = self.domain_list
-            self.opt_data["routes"] = self.route_list
-            self.opt_data["rules"] = self.rule_list
-            self.opt_data["members"] = self.member_list
+            self.opt_data["addresses"] = deepcopy(self.address_list)
+            self.opt_data["dns_servers"] = deepcopy(self.dns_list)
+            self.opt_data["domain"] = deepcopy(self.domain_list)
+            self.opt_data["routes"] = deepcopy(self.route_list)
+            self.opt_data["rules"] = deepcopy(self.rule_list)
+            self.opt_data["members"] = deepcopy(self.member_list)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False
@@ -111,14 +116,9 @@ class LinuxBondFrame(InterfaceFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] == "interface":
-                    if net_object["name"] not in self.member_list:
-                        self.available_members.append(
-                            {"type": "interface", "name": net_object["name"], "mtu": net_object["mtu"]})
+                if net_object["type"] in ["interface", "bridge", "vlan"] and net_object not in self.member_list:
+                    self.available_members.append(deepcopy(net_object))
 
-                # if net_object["type"] == "vlan":
-                #     self.available_devices.append({"type": "vlan", "device": net_object["device"],
-                #                                    "mtu": net_object["mtu"], "vlan_id": net_object["vlan_id"]})
 
     def _add_member(self):
         self.widget_dict["MemberPopUp"] = PopUpDialog(self._screen, "Select new member:",
@@ -126,28 +126,32 @@ class LinuxBondFrame(InterfaceFrame):
         self.widget_dict["drop_member"] = DropdownList(self.pop_up_members, label="Available members")
         self.widget_dict["MemberPopUp"]._layouts[0].add_widget(self.widget_dict["drop_member"])
         self.widget_dict["MemberPopUp"].fix()
-        self.scene.add_effect(
-            self.widget_dict["MemberPopUp"])  # for net_object in self._model.current_config_object_list:
-        #     if net_object["type"] == "interface":
-        #         self.available_devices.append({"type": "interface", "name": config[i]["name"], "mtu": config[i]["mtu"]})
-        #     if net_object["type"] == "vlan":
-        #         self.available_devices.append({"type": "vlan", "device": config[i]["device"],
-        #                                        "mtu": config[i]["mtu"], "vlan_id": config[i]["vlan_id"]})
+        self.scene.add_effect(self.widget_dict["MemberPopUp"])
 
     def _member_on_close(self, choice):
         if choice == 0:
             self.widget_dict["MemberPopUp"].save()
             if self.widget_dict["drop_member"].value is None:
                 return
-            self.pop_up_members.remove(
-                (self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
-            self.member_list.append(self.widget_dict["drop_member"].value)
+            if self.widget_dict["drop_member"].value["type"] == "vlan":
+                self.pop_up_members.remove((self.widget_dict["drop_member"].value["vlan_id"],
+                                            self.widget_dict["drop_member"].value))
+            else:
+                self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
+                                            self.widget_dict["drop_member"].value))
+            self.member_list.append(deepcopy(self.widget_dict["drop_member"].value))
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
-            self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
-                                                         self.widget_dict["drop_member"].value["type"],
-                                                         self.widget_dict["drop_member"].value["mtu"]],
-                                                        self.widget_dict["drop_member"].value))
+            if self.widget_dict["drop_member"].value["type"] == "vlan":
+                self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["vlan_id"],
+                                                             self.widget_dict["drop_member"].value["type"],
+                                                             self.widget_dict["drop_member"].value["mtu"]],
+                                                            self.widget_dict["drop_member"].value))
+            else:
+                self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
+                                                             self.widget_dict["drop_member"].value["type"],
+                                                             self.widget_dict["drop_member"].value["mtu"]],
+                                                            self.widget_dict["drop_member"].value))
             self.widget_dict["members"]._required_height = len(self.member_list)
             self.fix()
 
@@ -157,10 +161,14 @@ class LinuxBondFrame(InterfaceFrame):
     def _delete_member(self):
         if self.selected_member is not None:
             self.available_members.append(self.selected_member)
-            self.pop_up_members.append(
-                (self.selected_member["name"], self.selected_member))
-            member_temp = ([self.selected_member["name"], self.selected_member["type"], self.selected_member["mtu"]],
-                           self.selected_member)
+            if self.selected_member["type"] == "vlan":
+                self.pop_up_members.append((self.selected_member["vlan_id"], self.selected_member))
+                member_temp = ([self.selected_member["vlan_id"], self.selected_member["type"],
+                                self.selected_member["mtu"]], self.selected_member)
+            else:
+                self.pop_up_members.append((self.selected_member["name"], self.selected_member))
+                member_temp = ([self.selected_member["name"], self.selected_member["type"],
+                                self.selected_member["mtu"]], self.selected_member)
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)

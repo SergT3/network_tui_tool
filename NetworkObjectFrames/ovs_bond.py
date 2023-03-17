@@ -46,13 +46,13 @@ class OVSBondFrame(LinuxBondFrame):
     def _on_close(self, choice):
         if choice == 0:
             self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = self.address_list
-            self.opt_data["dns_servers"] = self.dns_list
-            self.opt_data["domain"] = self.ovs_extra_list
-            self.opt_data["routes"] = self.route_list
-            self.opt_data["rules"] = self.rule_list
-            self.opt_data["members"] = self.member_list
-            self.opt_data["ovs_extra"] = self.ovs_extra_list
+            self.opt_data["addresses"] = deepcopy(self.address_list)
+            self.opt_data["dns_servers"] = deepcopy(self.dns_list)
+            self.opt_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.opt_data["routes"] = deepcopy(self.route_list)
+            self.opt_data["rules"] = deepcopy(self.rule_list)
+            self.opt_data["members"] = deepcopy(self.member_list)
+            self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False

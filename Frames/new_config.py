@@ -87,6 +87,7 @@ class NewConfigFrame(InterruptFrame):
                     self._model.edit_mode = True
                     self._model.current_network_object = i
                     temp_name = self._model.current_network_object["type"]
+                    self.selected_object = None
                     if temp_name == "interface":
                         raise NextScene("Interface")
                     if temp_name == "vlan":

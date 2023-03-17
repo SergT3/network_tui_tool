@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
 from NetworkObjectFrames.network_object_attributes import ovs_dpdk_port
@@ -99,7 +101,7 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
                 return
             self.pop_up_members.remove(
                 (self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
-            self.member_list.append(self.widget_dict["drop_member"].value)
+            self.member_list.append(deepcopy(self.widget_dict["drop_member"].value))
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],

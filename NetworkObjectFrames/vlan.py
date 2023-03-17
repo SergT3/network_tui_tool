@@ -106,6 +106,9 @@ class VlanFrame(InterruptFrame):
             self.opt_data = deepcopy(self.data)
             self.opt_data["addresses"] = self.address_list
             self.opt_data["routes"] = self.route_list
+            if self._model.edit_mode:
+                self._model.current_config_object_list.remove(self._model.current_network_object)
+            self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
@@ -120,6 +123,7 @@ class VlanFrame(InterruptFrame):
 
     def _cancel(self):
         self._model.current_network_object = {}
+        self._model.edit_mode = False
         raise NextScene("NewConfig")
 
     def _add_address(self):
@@ -209,19 +213,7 @@ class VlanFrame(InterruptFrame):
         self.available_devices = [("None", None)]
         if len(self._model.current_config_object_list) != 0:
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] == "interface" or net_object["type"] == "ovs_bond" or net_object["type"] == "linux_bond":
+                if net_object["type"] in ["interface", "ovs_bond", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices
-                # if net_object["type"] == "vlan":
-                #     self.available_devices.append({"type": "vlan", "device": net_object["device"],
-                #                                    "mtu": net_object["mtu"], "vlan_id": net_object["vlan_id"]})
         self.fix()
-
-# config = (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
-#         for i in config:
-#             if config[i]["type"] == "interface":
-#                 self.available_devices.append(config[i]["name"])
-#             elif config[i]["type"] == "ovs_bond":
-#                 self.available_devices.append(config[i]["name"])
-#             elif config[i]["type"] == "linux_bond":
-#                 self.available_devices.append(config[i]["name"])

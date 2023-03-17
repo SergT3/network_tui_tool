@@ -50,13 +50,13 @@ class OVSBridgeFrame(LinuxBridgeFrame):
     def _on_close(self, choice):
         if choice == 0:
             self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = self.address_list
-            self.opt_data["dns_servers"] = self.dns_list
-            self.opt_data["domain"] = self.ovs_extra_list
-            self.opt_data["routes"] = self.route_list
-            self.opt_data["rules"] = self.rule_list
-            self.opt_data["members"] = self.member_list
-            self.opt_data["ovs_extra"] = self.ovs_extra_list
+            self.opt_data["addresses"] = deepcopy(self.address_list)
+            self.opt_data["dns_servers"] = deepcopy(self.dns_list)
+            self.opt_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.opt_data["routes"] = deepcopy(self.route_list)
+            self.opt_data["rules"] = deepcopy(self.rule_list)
+            self.opt_data["members"] = deepcopy(self.member_list)
+            self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False
@@ -102,12 +102,6 @@ class OVSBridgeFrame(LinuxBridgeFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] in ["interface","linux_bond", "ovs_bond"]:
-                    if net_object["name"] not in self.member_list:
-                        self.available_members.append(
-                            {"type": net_object["type"], "name": net_object["name"], "mtu": net_object["mtu"]})
-                elif net_object["type"] == "vlan":
-                    if net_object["device"] not in self.member_list:
-                        self.available_members.append(
-                            {"type": "vlan", "device": net_object["device"], "mtu": net_object["mtu"]})
+                if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] and net_object not in self.member_list:
+                    self.available_members.append(net_object)
 
