@@ -62,6 +62,7 @@ class NewConfigFrame(InterruptFrame):
 
     def _on_load(self):
         self.update_object_list()
+        self._model.get_config_members()
         self.ovs_box.value = False
         self.linux_box.value = False
 
@@ -113,6 +114,7 @@ class NewConfigFrame(InterruptFrame):
 
     def _save_update(self):
         self._model.write_config()
+        self._model.write_config_members()
         self._model.current_config = None
         self._model.current_config_object_list = []
         raise NextScene("Configs")
@@ -125,7 +127,7 @@ class NewConfigFrame(InterruptFrame):
         if self.selected_object is not None:
             self._model.remove_object(self.selected_object)
             if self.selected_object["type"] == "vlan":
-                self.object_list.options.remove((["", self.selected_object["type"]], self.selected_object))
+                self.object_list.options.remove(([self.selected_object["vlan_id"], self.selected_object["type"]], self.selected_object))
             else:
                 self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
             self.selected_object = None
@@ -138,13 +140,11 @@ class NewConfigFrame(InterruptFrame):
     def update_object_list(self):
         if self._model.current_config is not None:
             self.config_name.text = self._model.current_config
-            # chdir("Configs")
-            # object_dict = read_dict_from_yaml(self._model.current_config + ".yaml")
             if len(self._model.current_config_object_list):
                 self.object_list.options = []
                 for i in self._model.current_config_object_list:
                     if i["type"] == "vlan":
-                        self.object_list.options.append((["", i["type"]], i))
+                        self.object_list.options.append(([i["vlan_id"], i["type"]], i))
                     else:
                         self.object_list.options.append(([i["name"], i["type"]], i))
             else:

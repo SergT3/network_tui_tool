@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
 from NetworkObjectFrames.network_object_attributes import ovs_dpdk_bond
@@ -54,9 +52,8 @@ class OVSDpdkBondFrame(OVSBondFrame):
                     self.pop_up_members.append((i["name"], i))
             if len(self.member_list):
                 for i in self.pop_up_members:
-                    for j in self.member_list:
-                        if i[1]["type"] == j["type"] and i[1]["name"] == j["name"]:
-                            self.pop_up_members.remove(i)
+                    if i[1] in self.member_list:
+                        self.pop_up_members.remove(i)
         else:
             self.pop_up_members = [("None", None)]
 
@@ -76,7 +73,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
                         self.widget_dict[i].options = []
                         if self.member_list is not None and len(self.member_list):
                             for j in self.member_list:
-                                self.widget_dict[i].options.append(([j["type"], j["name"]], j))
+                                self.widget_dict[i].options.append(([j["name"], j["type"]], j))
                                 self.widget_dict[i]._required_height = len(self.member_list)
                     else:
                         self.widget_dict[i]._required_height = 1
@@ -92,18 +89,19 @@ class OVSDpdkBondFrame(OVSBondFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] == "ovs_dpdk_port":
-                    if net_object["name"] not in self.member_list:
-                        self.available_members.append(deepcopy(net_object))
+                if net_object["type"] == "ovs_dpdk_port" \
+                        and net_object not in self.member_list \
+                        and net_object not in self._model.current_config_members:
+                    self.available_members.append(net_object)
 
     def _member_on_close(self, choice):
         if choice == 0:
             self.widget_dict["MemberPopUp"].save()
             if self.widget_dict["drop_member"].value is None:
                 return
-            self.pop_up_members.remove(
-                (self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
-            self.member_list.append(deepcopy(self.widget_dict["drop_member"].value))
+            self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
+            self.member_list.append(self.widget_dict["drop_member"].value)
+            self._model.current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
@@ -122,6 +120,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
+                self._model.current_config_members.remove(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

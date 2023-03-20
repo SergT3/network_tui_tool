@@ -1,9 +1,6 @@
-from copy import deepcopy
+from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
-from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Text, Button, CheckBox, MultiColumnListBox
-
-from NetworkObjectFrames.network_object_attributes import ovs_user_bridge, common_check, common_text, common_list, ovs_common
+from NetworkObjectFrames.network_object_attributes import ovs_user_bridge
 from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame
 
 
@@ -45,14 +42,11 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             self.pop_up_members = []
             for i in self.available_members:
                 if i["type"] == "ovs_dpdk_bond":
-                    self.pop_up_members.append((i["name"], {"type": i["type"], "name": i["name"],
-                                                            "rx_queue": i["rx_queue"],
-                                                            "members": i["members"]}))
+                    self.pop_up_members.append((i["name"], i))
             if len(self.member_list):
                 for i in self.pop_up_members:
-                    for j in self.member_list:
-                        if i[1]["type"] == j["type"] and i[1]["name"] == j["name"]:
-                            self.pop_up_members.remove(i)
+                    if i[1] in self.member_list:
+                        self.pop_up_members.remove(i)
         else:
             self.pop_up_members = [("None", None)]
 
@@ -72,7 +66,7 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
                         self.widget_dict[i].options = []
                         if self.member_list is not None and len(self.member_list):
                             for j in self.member_list:
-                                self.widget_dict[i].options.append(([j["type"], j["name"]], j))
+                                self.widget_dict[i].options.append(([j["name"], j["type"]], j))
                                 self.widget_dict[i]._required_height = len(self.member_list)
                     else:
                         self.widget_dict[i]._required_height = 1
@@ -88,9 +82,10 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] == "ovs_dpdk_bond":
-                    if net_object["name"] not in self.member_list:
-                        self.available_members.append(net_object)
+                if net_object["type"] == "ovs_dpdk_bond" \
+                        and net_object not in self.member_list \
+                        and net_object not in self._model.current_config_members:
+                    self.available_members.append(net_object)
 
     def _member_on_close(self, choice):
         if choice == 0:
@@ -99,7 +94,8 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
                 return
             self.pop_up_members.remove(
                 (self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
-            self.member_list.append(deepcopy(self.widget_dict["drop_member"].value))
+            self.member_list.append(self.widget_dict["drop_member"].value)
+            self._model.current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
@@ -118,6 +114,7 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
+                self._model.current_config_members.remove(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

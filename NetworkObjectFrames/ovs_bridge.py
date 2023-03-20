@@ -4,7 +4,8 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, PopUpDialog, MultiColumnListBox
 
 from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame
-from NetworkObjectFrames.network_object_attributes import ovs_bridge, ovs_common
+from NetworkObjectFrames.network_object_attributes import ovs_bridge
+from utils import remove_empty_keys
 
 
 class OVSBridgeFrame(LinuxBridgeFrame):
@@ -57,6 +58,7 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.opt_data["rules"] = deepcopy(self.rule_list)
             self.opt_data["members"] = deepcopy(self.member_list)
             self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False
@@ -102,6 +104,8 @@ class OVSBridgeFrame(LinuxBridgeFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] and net_object not in self.member_list:
+                if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] \
+                        and net_object not in self.member_list \
+                        and net_object not in self._model.current_config_members:
                     self.available_members.append(net_object)
 

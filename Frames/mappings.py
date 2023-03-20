@@ -2,7 +2,8 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text, Label
 
 from interruptframe import InterruptFrame
-from utils import get_interfaces, to_asciimatics_list, dup_list_util, write_to_file
+from utils import get_interfaces, to_asciimatics_list, dup_list_util, write_to_file, save_data
+
 
 class MappingsModel(object):
 
@@ -22,12 +23,10 @@ class MappingsModel(object):
         interface_dict["interface_mapping"] = mapping_dict
         return write_to_file("mapping.yaml", interface_dict)
 
-    @staticmethod
-    def save_data(data):
-        write_to_file("Mappings_data.yaml", data)
 
 class MappingsFrame(InterruptFrame):
     _selected_nic = None
+
     @staticmethod
     def get_title():
         return "Mappings"
@@ -95,7 +94,7 @@ class MappingsFrame(InterruptFrame):
         self._model.mapping_writer(self.data, len(self.hardware_objects))
         self.data["nic_list"] = self.nic_list
         self.data["nic_show_list"] = self.nic_show_list
-        self._model.save_data(self.data)
+        self._model.save_data(self.get_title(), self.data)
         raise NextScene("Home")
 
     def _add(self):

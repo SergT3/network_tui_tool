@@ -4,7 +4,8 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog
 
 from NetworkObjectFrames.linux_bond import LinuxBondFrame
-from NetworkObjectFrames.network_object_attributes import ovs_bond, ovs_common
+from NetworkObjectFrames.network_object_attributes import ovs_bond
+from utils import remove_empty_keys
 
 
 class OVSBondFrame(LinuxBondFrame):
@@ -53,6 +54,7 @@ class OVSBondFrame(LinuxBondFrame):
             self.opt_data["rules"] = deepcopy(self.rule_list)
             self.opt_data["members"] = deepcopy(self.member_list)
             self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False

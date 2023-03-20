@@ -1,30 +1,30 @@
-from os import mkdir, chdir, remove, stat
+from os import mkdir, chdir, remove
 from os.path import exists
 
-import touch
 import yaml
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
 from interruptframe import InterruptFrame
-from utils import list_files, to_asciimatics_list, write_to_file, read_dict_from_yaml,remove_empty_keys
+from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml
 
 
 class ConfigsModel(object):
     current_config = None
     config_list = []
     current_config_object_list = []
+    current_config_members = []
     current_config_raw = None
     _ovs_checkbox = False
     _linux_checkbox = False
     _delete_list = []
     current_network_object = {}  # opt_data
     edit_mode = False
+
     # Methods for Configs
     @staticmethod
     def get_configs():
-        is_directory = exists("Configs")
-        if is_directory:
+        if exists("Configs"):
             chdir("Configs")
             config_list = list_files("*.yaml")
             if len(config_list) == 0:
@@ -42,11 +42,11 @@ class ConfigsModel(object):
         if not exists("Configs"):
             mkdir("Configs")
         # touch.touch(str("Configs/" + self.current_config + ".yaml"))
-        chdir("Configs")
-        temp = open(self.current_config + ".yaml", "w")
-        temp.close()
-        chdir("..")
-        write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": remove_empty_keys(self.current_config_object_list)})
+        # chdir("Configs")
+        # temp = open(self.current_config + ".yaml", "w")
+        # temp.close()
+        # chdir("..")
+        write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": self.current_config_object_list})
         self.current_config = None
         self.current_config_object_list = []
         return
@@ -75,6 +75,21 @@ class ConfigsModel(object):
             return
         chdir("..")
         return True
+
+    def write_config_members(self):
+        if self.current_config is not None:
+            if not exists("Configs/Config_members"):
+                mkdir("Configs/Config_members")
+            write_to_file("Configs/Config_members/" + self.current_config + "_members.yaml", self.current_config_members)
+            self.current_config_members = []
+
+
+    def get_config_members(self):
+        if self.current_config is not None:
+            if exists("Configs/Config_members/" + self.current_config + "_members.yaml"):
+                temp_members =  read_from_yaml("Configs/Config_members/" + self.current_config + "_members.yaml")
+                self.current_config_members = temp_members if temp_members is not None else []
+
 
     # Methods for NewConfig
 
@@ -177,7 +192,7 @@ class ConfigsFrame(InterruptFrame):
             self.save()
             self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
             self._model.current_config_object_list = \
-                (read_dict_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
+                (read_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
             raise NextScene("NewConfig")
 
     def _delete(self):
@@ -187,8 +202,7 @@ class ConfigsFrame(InterruptFrame):
             raise NextScene("Configs")
 
     def _on_load(self):
-        self.configs_list.options = self._model.get_configs()
-        self.configs_list._required_height = len(self.configs_list.options)
+        self.update_configs_list()
 
     def _show(self):
         self.save()
@@ -197,13 +211,8 @@ class ConfigsFrame(InterruptFrame):
 
     def update_configs_list(self):
         self.configs_list.options = self._model.get_configs()
-        if len(self._model.current_config_object_list) != 0:
-            self.object_list.options = []
-            for i in self._model.current_config_object_list:
-                self.object_list.options.append(([i["name"], i["type"]], i))
-        else:
-            self.object_list.options = [(["None"], None)]
-        return
+        self.configs_list._required_height = len(self.configs_list.options)
+        self.fix()
 
     def _cancel(self):
         raise NextScene("Home")

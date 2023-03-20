@@ -5,6 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpD
 
 from NetworkObjectFrames.interface import InterfaceFrame
 from NetworkObjectFrames.network_object_attributes import linux_bridge
+from utils import remove_empty_keys
 
 
 class LinuxBridgeFrame(InterfaceFrame):
@@ -92,6 +93,7 @@ class LinuxBridgeFrame(InterfaceFrame):
             self.opt_data["routes"] = deepcopy(self.route_list)
             self.opt_data["rules"] = deepcopy(self.rule_list)
             self.opt_data["members"] = deepcopy(self.member_list)
+            self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False
@@ -102,8 +104,10 @@ class LinuxBridgeFrame(InterfaceFrame):
     def get_available_members(self):
         if len(self._model.current_config_object_list):
             for net_object in self._model.current_config_object_list:
-                if net_object["type"] in ["interface", "bridge", "vlan"] and net_object not in self.member_list:
-                    self.available_members.append(deepcopy(net_object))
+                if net_object["type"] in ["interface", "bridge", "vlan"] \
+                        and net_object not in self.member_list\
+                        and net_object not in self._model.current_config_members:
+                    self.available_members.append(net_object)
 
     def _add_member(self):
         self.widget_dict["MemberPopUp"] = PopUpDialog(self._screen, "Select new member:",
@@ -125,6 +129,7 @@ class LinuxBridgeFrame(InterfaceFrame):
                 self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
                                             self.widget_dict["drop_member"].value))
             self.member_list.append(self.widget_dict["drop_member"].value)
+            self._model.current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             if self.widget_dict["drop_member"].value["type"] == "vlan":
@@ -158,6 +163,7 @@ class LinuxBridgeFrame(InterfaceFrame):
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
+                self._model.current_config_members.remove(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

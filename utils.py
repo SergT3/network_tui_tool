@@ -43,7 +43,7 @@ def write_to_file(filename, data, open_type='w'):
             return False
 
 
-def read_dict_from_yaml(filename):
+def read_from_yaml(filename):
     if exists(filename):
         with open(filename, "r") as file:
             try:
@@ -53,6 +53,9 @@ def read_dict_from_yaml(filename):
                 return None
     return None
 
+
+def save_data(frame, data):
+    write_to_file(frame + "_data.yaml", data)
 
 def get_frame_data(frame):
     if exists(frame.get_title() + "_data.yaml"):
@@ -64,13 +67,11 @@ def get_frame_data(frame):
                 return None
     return None
 
-
-def remove_empty_keys(dict_list):
-    temp_dict_list = []
-    for i in dict_list:
-        temp_dict_list.append({key: value for (key, value) in i.items()
-                               if value is not False
-                               and value != ''
-                               and value is not None
-                               and value != []})
-    return temp_dict_list
+def remove_empty_keys(empty_key_dict):
+    temp_dict = {key: value for (key, value) in empty_key_dict.items()
+                 if value is not False
+                 and value != ''
+                 and value is not None
+                 and value != []
+                 }
+    return temp_dict

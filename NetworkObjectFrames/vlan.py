@@ -100,12 +100,11 @@ class VlanFrame(InterruptFrame):
                         self.data[i] = self._model.current_network_object[i]
                         self.widget_dict[i].value = self._model.current_network_object[i]
 
-
     def _on_close(self, choice):
         if choice == 0:
             self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = self.address_list
-            self.opt_data["routes"] = self.route_list
+            self.opt_data["addresses"] = deepcopy(self.address_list)
+            self.opt_data["routes"] = deepcopy(self.route_list)
             if self._model.edit_mode:
                 self._model.current_config_object_list.remove(self._model.current_network_object)
             self._model.edit_mode = False
@@ -141,18 +140,22 @@ class VlanFrame(InterruptFrame):
             if len(self.address_list) != 0:
                 if self.widget_dict["addresses"].options == [(["None"], None)]:
                     self.widget_dict["addresses"].options = []
-                self.widget_dict["addresses"].options.append((["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
-                                                              {"ip_netmask": self.widget_dict["AddressPopUp"].data[
-                                                                  "text"]}))
+                self.widget_dict["addresses"].options.append(
+                    (["ip_netmask:", self.widget_dict["AddressPopUp"].data["text"]],
+                     {"ip_netmask": self.widget_dict["AddressPopUp"].data[
+                         "text"]}))
                 self.widget_dict["addresses"]._required_height = len(self.address_list)
             self.fix()
 
     def _show_address(self):
         self.selected_address = self.widget_dict["addresses"].value
+
     def _delete_address(self):
         if self.selected_address is not None:
-            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
-                self.widget_dict["addresses"].options.remove((["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
+                "addresses"].options:
+                self.widget_dict["addresses"].options.remove(
+                    (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
             if len(self.address_list) == 0:
@@ -168,7 +171,8 @@ class VlanFrame(InterruptFrame):
             # if i == default:
             # self.widget_dict["RoutePopUp"]._layouts[0].add_widget(CheckBox("", label=i, name=i))
             # error: object of type bool has no len
-            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(Text(i + ":", validator=self._model.name_validator, name=i))
+            self.widget_dict["RoutePopUp"]._layouts[0].add_widget(
+                Text(i + ":", validator=self._model.name_validator, name=i))
         self.widget_dict["RoutePopUp"].fix()
         self.scene.add_effect(self.widget_dict["RoutePopUp"])
 
