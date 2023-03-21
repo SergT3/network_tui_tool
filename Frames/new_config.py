@@ -61,8 +61,8 @@ class NewConfigFrame(InterruptFrame):
         self.fix()
 
     def _on_load(self):
-        self.update_object_list()
         self._model.get_config_members()
+        self.update_object_list()
         self.ovs_box.value = False
         self.linux_box.value = False
 
@@ -83,7 +83,7 @@ class NewConfigFrame(InterruptFrame):
 
     def _edit(self):
         if self.selected_object is not None:
-            for i in self._model.current_config_object_list:
+            for i in self._model.current_config_objects:
                 if i == self.selected_object:
                     self._model.edit_mode = True
                     self._model.current_network_object = i
@@ -116,7 +116,8 @@ class NewConfigFrame(InterruptFrame):
         self._model.write_config()
         self._model.write_config_members()
         self._model.current_config = None
-        self._model.current_config_object_list = []
+        self._model.current_config_objects = []
+        self.current_config_members = []
         raise NextScene("Configs")
 
     def _add(self):
@@ -140,9 +141,9 @@ class NewConfigFrame(InterruptFrame):
     def update_object_list(self):
         if self._model.current_config is not None:
             self.config_name.text = self._model.current_config
-            if len(self._model.current_config_object_list):
+            if len(self._model.current_config_objects) + len(self._model.current_config_members):
                 self.object_list.options = []
-                for i in self._model.current_config_object_list:
+                for i in (self._model.current_config_objects + self._model.current_config_members):
                     if i["type"] == "vlan":
                         self.object_list.options.append(([i["vlan_id"], i["type"]], i))
                     else:

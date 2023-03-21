@@ -18,7 +18,7 @@ def get_interfaces():
 def to_asciimatics_list(python_list, dropdown=False):
     asciimatics_list = []
     if dropdown:
-        asciimatics_list.append(("None", "None"))
+        asciimatics_list.append(("None", None))
     for i in range(len(python_list)):
         asciimatics_list.append((python_list[i], python_list[i]))
     return asciimatics_list

@@ -45,6 +45,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
 
     def _on_load(self):
         self.get_available_members()
+        self.pop_up_members = []
         if len(self.available_members):
             self.pop_up_members = []
             for i in self.available_members:
@@ -87,8 +88,8 @@ class OVSDpdkBondFrame(OVSBondFrame):
         super()._on_close(choice)
 
     def get_available_members(self):
-        if len(self._model.current_config_object_list):
-            for net_object in self._model.current_config_object_list:
+        if len(self._model.current_config_objects):
+            for net_object in self._model.current_config_objects:
                 if net_object["type"] == "ovs_dpdk_port" \
                         and net_object not in self.member_list \
                         and net_object not in self._model.current_config_members:
@@ -101,6 +102,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
                 return
             self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
             self.member_list.append(self.widget_dict["drop_member"].value)
+            self._model.current_config_objects.remove(self.widget_dict["drop_member"].value)
             self._model.current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
@@ -121,6 +123,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
                 self._model.current_config_members.remove(self.selected_member)
+                self._model.current_config_objects.append(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

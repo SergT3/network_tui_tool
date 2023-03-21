@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
 from interruptframe import InterruptFrame
-from utils import remove_empty_keys
+from utils import remove_empty_keys, to_asciimatics_list
 
 
 class InterfaceFrame(InterruptFrame):
@@ -71,8 +71,13 @@ class InterfaceFrame(InterruptFrame):
 
     def add_common_attr(self):
         for i in common_text:
-            self.widget_dict[i] = Text(label=i, name=i)
-            self.layout1.add_widget(self.widget_dict[i])
+            if i == "name" and self.get_title() == "Interface":
+                self._model.get_physical_interfaces()
+                self.widget_dict[i] = DropdownList(to_asciimatics_list(self._model.nic_names), label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
+            else:
+                self.widget_dict[i] = Text(label=i, name=i)
+                self.layout1.add_widget(self.widget_dict[i])
         for i in common_check:
             self.widget_dict[i] = CheckBox("", label=i, name=i)
             self.layout1.add_widget(self.widget_dict[i])
@@ -262,7 +267,7 @@ class InterfaceFrame(InterruptFrame):
             self.opt_data["rules"] = self.rule_list
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                self._model.current_config_object_list.remove(self._model.current_network_object)
+                self._model.current_config_objects.remove(self._model.current_network_object)
             self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}

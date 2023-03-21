@@ -61,7 +61,6 @@ class VlanFrame(InterruptFrame):
 
     def _on_load(self):
         self.get_available_devices()
-
         if self._model.current_network_object == {}:
             for i in vlan_text:
                 self.widget_dict[i].value = ""
@@ -106,7 +105,7 @@ class VlanFrame(InterruptFrame):
             self.opt_data["addresses"] = deepcopy(self.address_list)
             self.opt_data["routes"] = deepcopy(self.route_list)
             if self._model.edit_mode:
-                self._model.current_config_object_list.remove(self._model.current_network_object)
+                self._model.current_config_objects.remove(self._model.current_network_object)
             self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
@@ -215,8 +214,8 @@ class VlanFrame(InterruptFrame):
 
     def get_available_devices(self):
         self.available_devices = [("None", None)]
-        if len(self._model.current_config_object_list) != 0:
-            for net_object in self._model.current_config_object_list:
+        if len(self._model.current_config_objects) != 0:
+            for net_object in self._model.current_config_objects:
                 if net_object["type"] in ["interface", "ovs_bond", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices
