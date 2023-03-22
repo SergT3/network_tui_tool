@@ -5,6 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpD
 
 from NetworkObjectFrames.network_object_attributes import vlan_text, vlan_list, route_titles
 from interruptframe import InterruptFrame
+from utils import remove_empty_keys
 
 
 class VlanFrame(InterruptFrame):
@@ -104,8 +105,12 @@ class VlanFrame(InterruptFrame):
             self.opt_data = deepcopy(self.data)
             self.opt_data["addresses"] = deepcopy(self.address_list)
             self.opt_data["routes"] = deepcopy(self.route_list)
+            self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                self._model.current_config_objects.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.current_config_objects:
+                    self._model.current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.current_config_members:
+                    self._model.current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.current_network_object = {}
@@ -151,8 +156,7 @@ class VlanFrame(InterruptFrame):
 
     def _delete_address(self):
         if self.selected_address is not None:
-            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
-                "addresses"].options:
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
                 self.widget_dict["addresses"].options.remove(
                     (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
@@ -216,7 +220,7 @@ class VlanFrame(InterruptFrame):
         self.available_devices = [("None", None)]
         if len(self._model.current_config_objects) != 0:
             for net_object in self._model.current_config_objects:
-                if net_object["type"] in ["interface", "ovs_bond", "linux_bond"]:
+                if net_object["type"] in ["interface", "ovs_bond", "linux_bond", "linux_bridge", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices
         self.fix()

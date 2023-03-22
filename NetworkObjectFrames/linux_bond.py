@@ -110,7 +110,10 @@ class LinuxBondFrame(InterfaceFrame):
             self.opt_data["members"] = deepcopy(self.member_list)
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                self._model.current_config_objects.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.current_config_objects:
+                    self._model.current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.current_config_members:
+                    self._model.current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
             self._model.handle_object(self.opt_data)
             self._model.write_config_members()

@@ -1,11 +1,15 @@
+from copy import deepcopy
+
 from asciimatics.exceptions import NextScene
-from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu
+from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
 
 from interruptframe import InterruptFrame
 
 
 class NewConfigFrame(InterruptFrame):
     selected_object = None
+    ovs_mode = None
+    linux_mode = None
 
     @staticmethod
     def get_title():
@@ -63,6 +67,29 @@ class NewConfigFrame(InterruptFrame):
     def _on_load(self):
         self._model.get_config_members()
         self.update_object_list()
+        # is_linux_config = False
+        # for i in self._model.current_config_members:
+        #     if i["type"] == "vlan" and "parent" in i.keys():
+        #         is_linux_config = True
+        #         break
+        # if is_linux_config:
+        #     for i in self._model.current_config_members:
+        #         if i["type"] == "vlan" and "parent" in i.keys():
+        #             for j in self._model.current_config_objects:
+        #                 if j == i["parent"]:
+        #                     i.pop("parent")
+        #                     j["members"].append(i)
+        #                     if i in self._model.current_config_objects:
+        #                         self._model.current_config_objects.remove(i)
+        #                     break
+        #         if i["type"] == "vlan" and "parent" in i.keys():
+        #             for j in self._model.current_config_members:
+        #                 if j == i["parent"]:
+        #                     i.pop("parent")
+        #                     j["members"].append(i)
+        #                     if i in self._model.current_config_objects:
+        #                         self._model.current_config_objects.remove(i)
+        #                     break
         self.ovs_box.value = False
         self.linux_box.value = False
 
@@ -72,18 +99,19 @@ class NewConfigFrame(InterruptFrame):
 
     def _checkbox(self):
         if self.ovs_box.value == self.linux_box.value:
-            self.pop_up_menu_list = [("None", None)]
-            self.object_list.disabled = True
+            self.ovs_box.disabled = False
+            self.linux_box.disabled = False
+            self.pop_up_menu_list = self._linux_menu + self._ovs_menu
         if self.linux_box.value and not self.ovs_box.value:
-            self.object_list.disabled = False
             self.pop_up_menu_list = self._linux_menu
+            self.ovs_box.disabled = True
         if self.ovs_box.value and not self.linux_box.value:
-            self.object_list.disabled = False
             self.pop_up_menu_list = self._ovs_menu
+            self.linux_box.disabled = True
 
     def _edit(self):
         if self.selected_object is not None:
-            for i in self._model.current_config_objects:
+            for i in self._model.current_config_objects + self._model.current_config_members:
                 if i == self.selected_object:
                     self._model.edit_mode = True
                     self._model.current_network_object = i
@@ -112,13 +140,54 @@ class NewConfigFrame(InterruptFrame):
         self.save()
         raise NextScene("Raw")
 
+    def save_mode(self):
+        if self.ovs_mode.value == self.linux_mode.value:
+            self.ovs_mode.disabled = False
+            self.linux_mode.disabled = False
+        if self.linux_mode.value and not self.ovs_mode.value:
+            self.ovs_mode.disabled = True
+        if self.ovs_mode.value and not self.linux_mode.value:
+            self.linux_mode.disabled = True
+
     def _save_update(self):
-        self._model.write_config()
-        self._model.write_config_members()
-        self._model.current_config = None
-        self._model.current_config_objects = []
-        self.current_config_members = []
-        raise NextScene("Configs")
+        self.save()
+        # write_to_file("data_value_old", self.data)
+        self.pop_up = PopUpDialog(self._screen, "Save " + self.config_name.text + " in", ["OK", "Cancel"],
+                                  on_close=self._on_close)
+        self.ovs_mode = CheckBox("OVS mode", on_change=self.save_mode, name="OVS")
+        self.linux_mode = CheckBox("linux mode", on_change=self.save_mode, name="linux")
+        self.pop_up._layouts[0].add_widget(self.ovs_mode)
+        self.pop_up._layouts[0].add_widget(self.linux_mode)
+        self.pop_up.fix()
+        self.scene.add_effect(self.pop_up)
+
+    def _on_close(self, choice):
+        if choice == 0:
+            # if self.linux_mode.value:
+            #     for i in self._model.current_config_members:
+            #         if i["type"] == "vlan":
+            #             for j in self._model.current_config_objects:
+            #                 if "members" in j.keys():
+            #                     if i in j["members"]:
+            #                         j["members"].remove(i)
+            #                         self._model.current_config_objects.append(i)
+            #                         i["device"] = j["name"]
+            #                         i["parent"] = deepcopy(j)
+            #                         break
+            #             for j in self._model.current_config_members:
+            #                 if "members" in j.keys():
+            #                     if i in j["members"]:
+            #                         j["members"].remove(i)
+            #                         self._model.current_config_objects.append(i)
+            #                         i["device"] = j["name"]
+            #                         i["parent"] = deepcopy(j)
+            #                         break
+            self._model.write_config()
+            self._model.write_config_members()
+            self._model.current_config = None
+            self._model.current_config_objects = []
+            self._model.current_config_members = []
+            raise NextScene("Configs")
 
     def _add(self):
         self.pop_up = PopupMenu(self._screen, self.pop_up_menu_list, self._screen.width // 4, self._screen.height // 4)

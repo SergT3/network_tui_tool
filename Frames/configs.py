@@ -48,7 +48,6 @@ class ConfigsModel(object):
         # temp.close()
         # chdir("..")
         write_to_file("Configs/" + self.current_config + ".yaml", {"network_config": self.current_config_objects})
-        self.current_config = None
         self.current_config_objects = []
         return
 
@@ -74,6 +73,8 @@ class ConfigsModel(object):
 
     def write_config_members(self):
         if self.current_config is not None:
+            if not exists("Configs"):
+                mkdir("Configs")
             if not exists("Configs/Config_members"):
                 mkdir("Configs/Config_members")
             write_to_file("Configs/Config_members/" + self.current_config + "_members.yaml", self.current_config_members)
