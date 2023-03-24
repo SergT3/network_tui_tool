@@ -1,7 +1,11 @@
+from copy import deepcopy
+
+from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
 from NetworkObjectFrames.network_object_attributes import ovs_dpdk_port
 from NetworkObjectFrames.ovs_dpdk_bond import OVSDpdkBondFrame
+from utils import remove_empty_keys
 
 
 class OVSDpdkPortFrame(OVSDpdkBondFrame):
@@ -91,6 +95,28 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
                         and net_object not in self._model.current_config_members:
                     self.available_members.append(net_object)
 
+    def _on_close(self, choice):
+        if choice == 0:
+            self.opt_data = deepcopy(self.data)
+            self.opt_data["addresses"] = deepcopy(self.address_list)
+            self.opt_data["dns_servers"] = deepcopy(self.dns_list)
+            self.opt_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.opt_data["routes"] = deepcopy(self.route_list)
+            self.opt_data["rules"] = deepcopy(self.rule_list)
+            self.opt_data["members"] = deepcopy(self.member_list)
+            self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            self.opt_data = remove_empty_keys(self.opt_data)
+            if self._model.edit_mode:
+                if self._model.current_network_object in self._model.current_config_objects:
+                    self._model.current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.current_config_members:
+                    self._model.current_config_members.remove(self._model.current_network_object)
+            self._model.edit_mode = False
+            self._model.handle_object(self.opt_data)
+            self._model.write_config_members()
+            self._model.current_network_object = {}
+            raise NextScene("NewConfig")
+
     def _member_on_close(self, choice):
         if choice == 0:
             self.widget_dict["MemberPopUp"].save()
@@ -112,15 +138,18 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
     def _delete_member(self):
         if self.selected_member is not None:
             self.available_members.append(self.selected_member)
-            self.pop_up_members.append(
-                (self.selected_member["name"], self.selected_member))
+            if (self.selected_member["name"], self.selected_member) in self._model.current_config_objects:
+                self.pop_up_members.append(
+                    (self.selected_member["name"], self.selected_member))
             member_temp = ([self.selected_member["name"], self.selected_member["type"]],
                            self.selected_member)
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
-                self._model.current_config_members.remove(self.selected_member)
-                self._model.current_config_objects.append(self.selected_member)
+                if self.selected_member in self._model.current_config_members:
+                    self._model.current_config_members.remove(self.selected_member)
+                if self.selected_member not in self._model.current_config_objects:
+                    self._model.current_config_objects.append(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

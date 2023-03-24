@@ -3,6 +3,7 @@ from copy import deepcopy
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog
 
+import utils
 from NetworkObjectFrames.linux_bond import LinuxBondFrame
 from NetworkObjectFrames.network_object_attributes import ovs_bond
 from utils import remove_empty_keys

@@ -94,7 +94,7 @@ class MappingsFrame(InterruptFrame):
         self._model.mapping_writer(self.data, len(self.hardware_objects))
         self.data["nic_list"] = self.nic_list
         self.data["nic_show_list"] = self.nic_show_list
-        self._model.save_data(self.get_title(), self.data)
+        save_data(self.get_title(), self.data)
         raise NextScene("Home")
 
     def _add(self):

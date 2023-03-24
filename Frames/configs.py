@@ -202,13 +202,14 @@ class ConfigsFrame(InterruptFrame):
             self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 5]
             self._model.current_config_objects = \
                 (read_from_yaml("Configs/" + self._model.current_config + ".yaml"))["network_config"]
+            self._model.get_config_members()
             raise NextScene("NewConfig")
 
     def _delete(self):
         if self.selected_config is not None:
-            self._model.delete_config(self.selected_config)
+            self._model.delete_config(self.configs_list.value[0: len(self.configs_list.value) - 5])
             self.selected_config = None
-            raise NextScene("Configs")
+            self.update_configs_list()
 
     def _on_load(self):
         self.update_configs_list()
