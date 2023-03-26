@@ -14,10 +14,8 @@ from NetworkObjectFrames.vlan import VlanFrame
 from NetworkObjectFrames.interface import InterfaceFrame
 from Frames.configs import ConfigsFrame, ConfigsModel
 from Frames.devices import DevicesFrame
-from Frames.nic import NICFrame
 from Frames.home import HomeFrame
 from Frames.mappings import MappingsFrame, MappingsModel
-# from Frames.mappings_intro import IntroFrame
 from Frames.new_config import NewConfigFrame
 from Frames.raw import RawFrame
 from utils import get_frame_data
@@ -50,7 +48,7 @@ class NetConfig(object):
 
         self.scenes = []
         self.scenes_by_name = {}
-        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame, NICFrame,
+        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame,
                        InterfaceFrame, VlanFrame, LinuxBridgeFrame, LinuxBondFrame, OVSBridgeFrame, OVSBondFrame,
                        OVSUserBridgeFrame, OVSDpdkBondFrame, OVSDpdkPortFrame]
         self.last_scene = None

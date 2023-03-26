@@ -16,7 +16,6 @@ class MappingsModel(object):
     @staticmethod
     def mapping_writer(data, length):
         interface_dict = {}
-        temp = []
         mapping_dict = {}
         for i in range(1, length + 1):
             mapping_dict[data[str(-i)]] = data[str(i)]

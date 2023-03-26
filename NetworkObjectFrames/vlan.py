@@ -107,12 +107,12 @@ class VlanFrame(InterruptFrame):
             self.opt_data["routes"] = deepcopy(self.route_list)
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.current_config_objects:
-                    self._model.current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.current_config_members:
-                    self._model.current_config_members.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.ovs_current_config_objects:
+                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.ovs_current_config_members:
+                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
-            self._model.handle_object(self.opt_data)
+            self._model.handle_ovs_object(self.opt_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
 
@@ -218,8 +218,8 @@ class VlanFrame(InterruptFrame):
 
     def get_available_devices(self):
         self.available_devices = [("None", None)]
-        if len(self._model.current_config_objects) != 0:
-            for net_object in self._model.current_config_objects:
+        if len(self._model.ovs_current_config_objects) != 0:
+            for net_object in self._model.ovs_current_config_objects:
                 if net_object["type"] in ["interface", "ovs_bond", "linux_bond", "linux_bridge", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices

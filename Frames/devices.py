@@ -1,5 +1,6 @@
-from asciimatics.widgets import Layout, Divider, ListBox, Button, TextBox
 from asciimatics.exceptions import NextScene
+from asciimatics.widgets import Layout, Divider, ListBox, Button
+
 from interruptframe import InterruptFrame
 from utils import get_interfaces, to_asciimatics_list
 

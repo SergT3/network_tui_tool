@@ -10,7 +10,7 @@ from utils import remove_empty_keys, to_asciimatics_list
 
 
 class InterfaceFrame(InterruptFrame):
-    opt_data = None
+    ovs_data = None
     address_list = []
     dns_list = []
     domain_list = []
@@ -259,20 +259,21 @@ class InterfaceFrame(InterruptFrame):
 
     def _on_close(self, choice):
         if choice == 0:
-            self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = self.address_list
-            self.opt_data["dns_servers"] = self.dns_list
-            self.opt_data["domain"] = self.domain_list
-            self.opt_data["routes"] = self.route_list
-            self.opt_data["rules"] = self.rule_list
-            self.opt_data = remove_empty_keys(self.opt_data)
+            self.ovs_data = deepcopy(self.data)
+            self.ovs_data["addresses"] = self.address_list
+            self.ovs_data["dns_servers"] = self.dns_list
+            self.ovs_data["domain"] = self.domain_list
+            self.ovs_data["routes"] = self.route_list
+            self.ovs_data["rules"] = self.rule_list
+            self.ovs_data = remove_empty_keys(self.ovs_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.current_config_objects:
-                    self._model.current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.current_config_members:
-                    self._model.current_config_members.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.ovs_current_config_objects:
+                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.ovs_current_config_members:
+                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
-            self._model.handle_object(self.opt_data)
+            self._model.handle_ovs_object(self.ovs_data)
+            self._model.handle_linux_object(self.ovs_data)
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
 

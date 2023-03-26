@@ -88,11 +88,11 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
         self.fix()
 
     def get_available_members(self):
-        if len(self._model.current_config_objects):
-            for net_object in self._model.current_config_objects:
+        if len(self._model.ovs_current_config_objects):
+            for net_object in self._model.ovs_current_config_objects:
                 if net_object["type"] == "interface" \
                         and net_object not in self.member_list \
-                        and net_object not in self._model.current_config_members:
+                        and net_object not in self._model.ovs_current_config_members:
                     self.available_members.append(net_object)
 
     def _on_close(self, choice):
@@ -107,12 +107,12 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
             self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.current_config_objects:
-                    self._model.current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.current_config_members:
-                    self._model.current_config_members.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.ovs_current_config_objects:
+                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.ovs_current_config_members:
+                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
-            self._model.handle_object(self.opt_data)
+            self._model.handle_ovs_object(self.opt_data)
             self._model.write_config_members()
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
@@ -125,8 +125,8 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
             self.pop_up_members.remove(
                 (self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
             self.member_list.append(self.widget_dict["drop_member"].value)
-            self._model.current_config_objects.remove(self.widget_dict["drop_member"].value)
-            self._model.current_config_members.append(self.widget_dict["drop_member"].value)
+            self._model.ovs_current_config_objects.remove(self.widget_dict["drop_member"].value)
+            self._model.ovs_current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
@@ -138,7 +138,7 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
     def _delete_member(self):
         if self.selected_member is not None:
             self.available_members.append(self.selected_member)
-            if (self.selected_member["name"], self.selected_member) in self._model.current_config_objects:
+            if (self.selected_member["name"], self.selected_member) in self._model.ovs_current_config_objects:
                 self.pop_up_members.append(
                     (self.selected_member["name"], self.selected_member))
             member_temp = ([self.selected_member["name"], self.selected_member["type"]],
@@ -146,10 +146,10 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
             while member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
-                if self.selected_member in self._model.current_config_members:
-                    self._model.current_config_members.remove(self.selected_member)
-                if self.selected_member not in self._model.current_config_objects:
-                    self._model.current_config_objects.append(self.selected_member)
+                if self.selected_member in self._model.ovs_current_config_members:
+                    self._model.ovs_current_config_members.remove(self.selected_member)
+                if self.selected_member not in self._model.ovs_current_config_objects:
+                    self._model.ovs_current_config_objects.append(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1

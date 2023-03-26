@@ -1,4 +1,4 @@
-from copy import deepcopy
+# from copy import deepcopy
 
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
@@ -67,29 +67,6 @@ class NewConfigFrame(InterruptFrame):
     def _on_load(self):
         self._model.get_config_members()
         self.update_object_list()
-        # is_linux_config = False
-        # for i in self._model.current_config_members:
-        #     if i["type"] == "vlan" and "parent" in i.keys():
-        #         is_linux_config = True
-        #         break
-        # if is_linux_config:
-        #     for i in self._model.current_config_members:
-        #         if i["type"] == "vlan" and "parent" in i.keys():
-        #             for j in self._model.current_config_objects:
-        #                 if j == i["parent"]:
-        #                     i.pop("parent")
-        #                     j["members"].append(i)
-        #                     if i in self._model.current_config_objects:
-        #                         self._model.current_config_objects.remove(i)
-        #                     break
-        #         if i["type"] == "vlan" and "parent" in i.keys():
-        #             for j in self._model.current_config_members:
-        #                 if j == i["parent"]:
-        #                     i.pop("parent")
-        #                     j["members"].append(i)
-        #                     if i in self._model.current_config_objects:
-        #                         self._model.current_config_objects.remove(i)
-        #                     break
         self.ovs_box.value = False
         self.linux_box.value = False
 
@@ -102,6 +79,8 @@ class NewConfigFrame(InterruptFrame):
             self.ovs_box.disabled = False
             self.linux_box.disabled = False
             self.pop_up_menu_list = self._linux_menu + self._ovs_menu
+            self.pop_up_menu_list.remove(("interface", self._model.add_interface))
+            self.pop_up_menu_list.remove(("vlan", self._model.add_vlan))
         if self.linux_box.value and not self.ovs_box.value:
             self.pop_up_menu_list = self._linux_menu
             self.ovs_box.disabled = True
@@ -111,7 +90,7 @@ class NewConfigFrame(InterruptFrame):
 
     def _edit(self):
         if self.selected_object is not None:
-            for i in self._model.current_config_objects + self._model.current_config_members:
+            for i in self._model.ovs_current_config_objects + self._model.ovs_current_config_members:
                 if i == self.selected_object:
                     self._model.edit_mode = True
                     self._model.current_network_object = i
@@ -163,30 +142,14 @@ class NewConfigFrame(InterruptFrame):
 
     def _on_close(self, choice):
         if choice == 0:
-            # if self.linux_mode.value:
-            #     for i in self._model.current_config_members:
-            #         if i["type"] == "vlan":
-            #             for j in self._model.current_config_objects:
-            #                 if "members" in j.keys():
-            #                     if i in j["members"]:
-            #                         j["members"].remove(i)
-            #                         self._model.current_config_objects.append(i)
-            #                         i["device"] = j["name"]
-            #                         i["parent"] = deepcopy(j)
-            #                         break
-            #             for j in self._model.current_config_members:
-            #                 if "members" in j.keys():
-            #                     if i in j["members"]:
-            #                         j["members"].remove(i)
-            #                         self._model.current_config_objects.append(i)
-            #                         i["device"] = j["name"]
-            #                         i["parent"] = deepcopy(j)
-            #                         break
             self._model.write_config()
             self._model.write_config_members()
+            # if linux
+            #write_config_alt
+            #write_config_alt_members
             self._model.current_config = None
-            self._model.current_config_objects = []
-            self._model.current_config_members = []
+            self._model.ovs_current_config_objects = []
+            self._model.ovs_current_config_members = []
             raise NextScene("Configs")
 
     def _add(self):
@@ -210,9 +173,9 @@ class NewConfigFrame(InterruptFrame):
     def update_object_list(self):
         if self._model.current_config is not None:
             self.config_name.text = self._model.current_config
-            if len(self._model.current_config_objects) + len(self._model.current_config_members):
+            if len(self._model.ovs_current_config_objects) + len(self._model.ovs_current_config_members):
                 self.object_list.options = []
-                for i in (self._model.current_config_objects + self._model.current_config_members):
+                for i in (self._model.ovs_current_config_objects + self._model.ovs_current_config_members):
                     if i["type"] == "vlan":
                         self.object_list.options.append(([i["vlan_id"], i["type"]], i))
                     else:
@@ -221,3 +184,44 @@ class NewConfigFrame(InterruptFrame):
                 self.object_list.options = [(["None"], None)]
         self.object_list._required_height = len(self.object_list.options)
         self.fix()
+
+# on_load
+# if self.linux_mode.value:
+#     for i in self._model.current_config_members:
+#         if i["type"] == "vlan":
+#             for j in self._model.current_config_objects:
+#                 if "members" in j.keys():
+#                     if i in j["members"]:
+#                         j["members"].remove(i)
+#                         self._model.current_config_objects.append(i)
+#                         i["device"] = j["name"]
+#                         i["parent"] = deepcopy(j)
+#                         break
+#             for j in self._model.current_config_members:
+#                 if "members" in j.keys():
+#                     if i in j["members"]:
+#                         j["members"].remove(i)
+#                         self._model.current_config_objects.append(i)
+#                         i["device"] = j["name"]
+#                         i["parent"] = deepcopy(j)
+#                         break
+# on_close
+# if self.linux_mode.value:
+#     for i in self._model.current_config_members:
+#         if i["type"] == "vlan":
+#             for j in self._model.current_config_objects:
+#                 if "members" in j.keys():
+#                     if i in j["members"]:
+#                         j["members"].remove(i)
+#                         self._model.current_config_objects.append(i)
+#                         i["device"] = j["name"]
+#                         i["parent"] = deepcopy(j)
+#                         break
+#             for j in self._model.current_config_members:
+#                 if "members" in j.keys():
+#                     if i in j["members"]:
+#                         j["members"].remove(i)
+#                         self._model.current_config_objects.append(i)
+#                         i["device"] = j["name"]
+#                         i["parent"] = deepcopy(j)
+#                         break

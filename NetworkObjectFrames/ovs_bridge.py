@@ -60,12 +60,12 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.current_config_objects:
-                    self._model.current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.current_config_members:
-                    self._model.current_config_members.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.ovs_current_config_objects:
+                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.ovs_current_config_members:
+                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
-            self._model.handle_object(self.opt_data)
+            self._model.handle_ovs_object(self.opt_data)
             self._model.write_config_members()
             self._model.current_network_object = {}
             raise NextScene("NewConfig")
@@ -106,10 +106,10 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.fix()
 
     def get_available_members(self):
-        if len(self._model.current_config_objects):
-            for net_object in self._model.current_config_objects:
+        if len(self._model.ovs_current_config_objects):
+            for net_object in self._model.ovs_current_config_objects:
                 if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] \
                         and net_object not in self.member_list \
-                        and net_object not in self._model.current_config_members:
+                        and net_object not in self._model.ovs_current_config_members:
                     self.available_members.append(net_object)
 
