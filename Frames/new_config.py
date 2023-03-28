@@ -1,4 +1,5 @@
 # from copy import deepcopy
+from os.path import exists
 
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
@@ -142,14 +143,13 @@ class NewConfigFrame(InterruptFrame):
 
     def _on_close(self, choice):
         if choice == 0:
-            self._model.write_config()
-            self._model.write_config_members()
-            # if linux
-            #write_config_alt
-            #write_config_alt_members
+            self._model.write_config(self.linux_mode.value)
+            self._model.write_config_members(self.linux_mode.value)
             self._model.current_config = None
             self._model.ovs_current_config_objects = []
             self._model.ovs_current_config_members = []
+            self._model.linux_current_config_objects = []
+            self._model.linux_current_config_members = []
             raise NextScene("Configs")
 
     def _add(self):

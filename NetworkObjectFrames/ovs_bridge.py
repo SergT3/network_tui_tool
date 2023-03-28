@@ -50,22 +50,32 @@ class OVSBridgeFrame(LinuxBridgeFrame):
 
     def _on_close(self, choice):
         if choice == 0:
-            self.opt_data = deepcopy(self.data)
-            self.opt_data["addresses"] = deepcopy(self.address_list)
-            self.opt_data["dns_servers"] = deepcopy(self.dns_list)
-            self.opt_data["domain"] = deepcopy(self.ovs_extra_list)
-            self.opt_data["routes"] = deepcopy(self.route_list)
-            self.opt_data["rules"] = deepcopy(self.rule_list)
-            self.opt_data["members"] = deepcopy(self.member_list)
-            self.opt_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
-            self.opt_data = remove_empty_keys(self.opt_data)
+            self.ovs_data = deepcopy(self.data)
+            self.ovs_data["addresses"] = deepcopy(self.address_list)
+            self.ovs_data["dns_servers"] = deepcopy(self.dns_list)
+            self.ovs_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.ovs_data["routes"] = deepcopy(self.route_list)
+            self.ovs_data["rules"] = deepcopy(self.rule_list)
+            self.ovs_data["members"] = deepcopy(self.member_list)
+            self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            self.ovs_data = remove_empty_keys(self.ovs_data)
+            self.linux_data = deepcopy(self.ovs_data)
+            if "members" in self.linux_data.keys():
+                for i in self.linux_data["members"]:
+                    if i["type"] == "vlan":
+                        self.linux_data["members"].remove(i)
             if self._model.edit_mode:
                 if self._model.current_network_object in self._model.ovs_current_config_objects:
                     self._model.ovs_current_config_objects.remove(self._model.current_network_object)
                 elif self._model.current_network_object in self._model.ovs_current_config_members:
                     self._model.ovs_current_config_members.remove(self._model.current_network_object)
+                if self._model.current_network_object in self._model.linux_current_config_objects:
+                    self._model.linux_current_config_objects.remove(self._model.current_network_object)
+                elif self._model.current_network_object in self._model.linux_current_config_members:
+                    self._model.linux_current_config_members.remove(self._model.current_network_object)
             self._model.edit_mode = False
-            self._model.handle_ovs_object(self.opt_data)
+            self._model.handle_ovs_object(self.ovs_data)
+            self._model.handle_linux_object(self.linux_data)
             self._model.write_config_members()
             self._model.current_network_object = {}
             raise NextScene("NewConfig")

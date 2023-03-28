@@ -167,7 +167,6 @@ class LinuxBridgeFrame(InterfaceFrame):
             self.widget_dict["members"]._required_height = len(self.member_list)
             self.fix()
 
-
     def _show_member(self):
         self.selected_member = self.widget_dict["members"].value
 

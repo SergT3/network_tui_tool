@@ -2,7 +2,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text, Label
 
 from interruptframe import InterruptFrame
-from utils import get_interfaces, to_asciimatics_list, dup_list_util, write_to_file, save_data
+from utils import get_interfaces, to_asciimatics_list, indexed_dup_list, write_to_file, save_data
 
 
 class MappingsModel(object):
@@ -47,9 +47,9 @@ class MappingsFrame(InterruptFrame):
         except KeyError:
             self.nic_show_list = None
         if self.nic_list is None:
-            self.nic_list = to_asciimatics_list(dup_list_util("nic", len(self.hardware_objects)), True)
+            self.nic_list = to_asciimatics_list(indexed_dup_list("nic", len(self.hardware_objects)), True)
         if self.nic_show_list is None:
-            self.nic_show_list = to_asciimatics_list(dup_list_util("nic", len(self.hardware_objects)))
+            self.nic_show_list = to_asciimatics_list(indexed_dup_list("nic", len(self.hardware_objects)))
         layout2.add_widget(Label("Interface mappings:"))
         layout2.add_widget(Divider(1), 1)
         for i in range(1, len(self.hardware_objects) + 1):

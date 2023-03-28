@@ -100,26 +100,29 @@ class OVSDpdkBondFrame(OVSBondFrame):
             self.widget_dict["MemberPopUp"].save()
             if self.widget_dict["drop_member"].value is None:
                 return
-            self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"], self.widget_dict["drop_member"].value))
             self.member_list.append(self.widget_dict["drop_member"].value)
             self._model.ovs_current_config_objects.remove(self.widget_dict["drop_member"].value)
             self._model.ovs_current_config_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
+            self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
+                                        self.widget_dict["drop_member"].value))
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
                                                          self.widget_dict["drop_member"].value["type"]],
                                                         self.widget_dict["drop_member"].value))
+            self._model.linux_current_config_objects.remove(self.widget_dict["drop_member"].value)
+            self._model.linux_current_config_members.append(self.widget_dict["drop_member"].value)
             self.widget_dict["members"]._required_height = len(self.member_list)
             self.fix()
 
     def _delete_member(self):
         if self.selected_member is not None:
             self.available_members.append(self.selected_member)
-            self.pop_up_members.append(
-                (self.selected_member["name"], self.selected_member))
-            member_temp = ([self.selected_member["name"], self.selected_member["type"]],
-                           self.selected_member)
-            while member_temp in self.widget_dict["members"].options:
+            self.pop_up_members.append((self.selected_member["name"], self.selected_member))
+            member_temp = ([self.selected_member["name"], self.selected_member["type"]], self.selected_member)
+            self._model.linux_current_config_members.remove(self.selected_member)
+            self._model.linux_current_config_objects.append(self.selected_member)
+            if member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
                 self._model.ovs_current_config_members.remove(self.selected_member)
