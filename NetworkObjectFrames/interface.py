@@ -267,14 +267,14 @@ class InterfaceFrame(InterruptFrame):
             self.ovs_data["rules"] = self.rule_list
             self.ovs_data = remove_empty_keys(self.ovs_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.ovs_current_config_objects:
-                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.ovs_current_config_members:
-                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
-                if self._model.current_network_object in self._model.linux_current_config_objects:
-                    self._model.linux_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.linux_current_config_members:
-                    self._model.linux_current_config_members.remove(self._model.current_network_object)
+                if len(self._model.ovs_edit_objects):
+                    for i in self._model.ovs_current_config_objects:
+                        if i in self._model.ovs_edit_objects:
+                            i["members"].append(self.ovs_data)
+                if len(self._model.linux_edit_objects):
+                    for i in self._model.linux_current_config_objects:
+                        if i in self._model.linux_edit_objects:
+                            i["members"].append(self.ovs_data)
             self._model.edit_mode = False
             self._model.handle_ovs_object(self.ovs_data)
             self._model.handle_linux_object(self.ovs_data)
@@ -313,8 +313,7 @@ class InterfaceFrame(InterruptFrame):
 
     def _delete_address(self):
         if self.selected_address is not None:
-            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict[
-                "addresses"].options:
+            while (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address) in self.widget_dict["addresses"].options:
                 self.widget_dict["addresses"].options.remove(
                     (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)

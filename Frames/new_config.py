@@ -91,30 +91,48 @@ class NewConfigFrame(InterruptFrame):
 
     def _edit(self):
         if self.selected_object is not None:
-            for i in self._model.ovs_current_config_objects + self._model.ovs_current_config_members:
-                if i == self.selected_object:
-                    self._model.edit_mode = True
-                    self._model.current_network_object = i
-                    temp_name = self._model.current_network_object["type"]
-                    self.selected_object = None
-                    if temp_name == "interface":
-                        raise NextScene("Interface")
-                    if temp_name == "vlan":
-                        raise NextScene("Vlan")
-                    if temp_name == "linux_bond":
-                        raise NextScene("LinuxBond")
-                    if temp_name == "linux_bridge":
-                        raise NextScene("LinuxBridge")
-                    if temp_name == "ovs_bond":
-                        raise NextScene("OVSBond")
-                    if temp_name == "ovs_bridge":
-                        raise NextScene("OVSBridge")
-                    if temp_name == "ovs_dpdk_bond":
-                        raise NextScene("OVSDpdkBond")
-                    if temp_name == "ovs_dpdk_port":
-                        raise NextScene("OVSDpdkPort")
-                    if temp_name == "ovs_user_bridge":
-                        raise NextScene("OVSUserBridge")
+            if self.selected_object in self._model.ovs_current_config_members:
+                for i in self._model.ovs_current_config_objects:
+                    if self.selected_object in i["members"]:
+                        i["members"].remove(self.selected_object)
+                        self._model.ovs_edit_objects.append(i)
+                self._model.ovs_current_config_members.remove(self.selected_object)
+            elif self.selected_object in self._model.ovs_current_config_objects:
+                self._model.ovs_current_config_objects.remove(self.selected_object)
+            if self.selected_object in self._model.linux_current_config_members:
+                if self.selected_object["type"] == "vlan":
+                    self._model.linux_current_config_objects.remove(self.selected_object)
+                    self._model.linux_current_config_members.remove(self.selected_object)
+                else:
+                    for i in self._model.linux_current_config_objects:
+                        if self.selected_object in i["members"]:
+                            i["members"].remove(self.selected_object)
+                            self._model.linux_edit_objects.append(i)
+                    self._model.linux_current_config_members.remove(self.selected_object)
+            elif self.selected_object in self._model.linux_current_config_objects:
+                self._model.linux_current_config_objects.remove(self.selected_object)
+            self._model.edit_mode = True
+            self._model.current_network_object = self.selected_object
+            obj_type = self._model.current_network_object["type"]
+            self.selected_object = None
+            if obj_type == "interface":
+                raise NextScene("Interface")
+            if obj_type == "vlan":
+                raise NextScene("Vlan")
+            if obj_type == "linux_bond":
+                raise NextScene("LinuxBond")
+            if obj_type == "linux_bridge":
+                raise NextScene("LinuxBridge")
+            if obj_type == "ovs_bond":
+                raise NextScene("OVSBond")
+            if obj_type == "ovs_bridge":
+                raise NextScene("OVSBridge")
+            if obj_type == "ovs_dpdk_bond":
+                raise NextScene("OVSDpdkBond")
+            if obj_type == "ovs_dpdk_port":
+                raise NextScene("OVSDpdkPort")
+            if obj_type == "ovs_user_bridge":
+                raise NextScene("OVSUserBridge")
 
     def _raw(self):
         self.save()

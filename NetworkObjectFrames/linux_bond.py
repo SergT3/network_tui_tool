@@ -115,14 +115,14 @@ class LinuxBondFrame(InterfaceFrame):
                         self.linux_data["members"].remove(i)
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.ovs_current_config_objects:
-                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.ovs_current_config_members:
-                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
-                if self._model.current_network_object in self._model.linux_current_config_objects:
-                    self._model.linux_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.linux_current_config_members:
-                    self._model.linux_current_config_members.remove(self._model.current_network_object)
+                if len(self._model.ovs_edit_objects):
+                    for i in self._model.ovs_current_config_objects:
+                        if i in self._model.ovs_edit_objects:
+                            i["members"].append(self.ovs_data)
+                if len(self._model.linux_edit_objects):
+                    for i in self._model.linux_current_config_objects:
+                        if i in self._model.linux_edit_objects:
+                            i["members"].append(self.ovs_data)
             self._model.edit_mode = False
             self._model.handle_ovs_object(self.ovs_data)
             self._model.handle_linux_object(self.linux_data)
@@ -169,6 +169,9 @@ class LinuxBondFrame(InterfaceFrame):
                 for i in self._model.linux_current_config_objects:
                     if i == self.widget_dict["drop_member"].value:
                         i["device"] = self.widget_dict["name"].value
+                for i in self._model.linux_current_config_members:
+                    if i == self.widget_dict["drop_member"].value:
+                        i["device"] = self.widget_dict["name"].value
             else:
                 self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
                                             self.widget_dict["drop_member"].value))
@@ -192,6 +195,9 @@ class LinuxBondFrame(InterfaceFrame):
                 member_temp = ([self.selected_member["vlan_id"], self.selected_member["type"],
                                 self.selected_member["mtu"]], self.selected_member)
                 for i in self._model.linux_current_config_objects:
+                    if i == self.selected_member:
+                        i.pop("device")
+                for i in self._model.linux_current_config_members:
                     if i == self.selected_member:
                         i.pop("device")
             else:

@@ -25,6 +25,8 @@ class ConfigsModel(object):
     current_network_object = {}  # ovs_data
     edit_mode = False
     nic_names = []
+    ovs_edit_objects = []
+    linux_edit_objects = []
 
     # Methods for Configs
     @staticmethod

@@ -66,14 +66,14 @@ class OVSBridgeFrame(LinuxBridgeFrame):
                         self.linux_data["members"].remove(i)
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.ovs_current_config_objects:
-                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.ovs_current_config_members:
-                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
-                if self._model.current_network_object in self._model.linux_current_config_objects:
-                    self._model.linux_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.linux_current_config_members:
-                    self._model.linux_current_config_members.remove(self._model.current_network_object)
+                if len(self._model.ovs_edit_objects):
+                    for i in self._model.ovs_current_config_objects:
+                        if i in self._model.ovs_edit_objects:
+                            i["members"].append(self.ovs_data)
+                if len(self._model.linux_edit_objects):
+                    for i in self._model.linux_current_config_objects:
+                        if i in self._model.linux_edit_objects:
+                            i["members"].append(self.ovs_data)
             self._model.edit_mode = False
             self._model.handle_ovs_object(self.ovs_data)
             self._model.handle_linux_object(self.linux_data)

@@ -107,14 +107,14 @@ class VlanFrame(InterruptFrame):
             self.opt_data["routes"] = deepcopy(self.route_list)
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
-                if self._model.current_network_object in self._model.ovs_current_config_objects:
-                    self._model.ovs_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.ovs_current_config_members:
-                    self._model.ovs_current_config_members.remove(self._model.current_network_object)
-                if self._model.current_network_object in self._model.linux_current_config_objects:
-                    self._model.linux_current_config_objects.remove(self._model.current_network_object)
-                elif self._model.current_network_object in self._model.linux_current_config_members:
-                    self._model.linux_current_config_members.remove(self._model.current_network_object)
+                if len(self._model.ovs_edit_objects):
+                    for i in self._model.ovs_current_config_objects:
+                        if i in self._model.ovs_edit_objects:
+                            i["members"].append(self.opt_data)
+                if len(self._model.linux_edit_objects):
+                    for i in self._model.linux_current_config_objects:
+                        if i in self._model.linux_edit_objects:
+                            i["members"].append(self.opt_data)
             self._model.edit_mode = False
             self._model.handle_ovs_object(self.opt_data)
             self._model.handle_linux_object(self.opt_data)
