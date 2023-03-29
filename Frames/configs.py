@@ -1,5 +1,5 @@
 from copy import deepcopy
-from os import mkdir, chdir, remove
+from os import mkdir, chdir
 from os.path import exists
 
 import rm
@@ -61,18 +61,18 @@ class ConfigsModel(object):
         # chdir("..")
         if linux_mode:
             if exists("Configs/" + self.current_config + "_ovs.yaml"):
-                remove("Configs/" + self.current_config + "_ovs.yaml")
-            if exists("Configs/Alt_configs" + self.current_config + "_linux.yaml"):
-                remove("Configs/" + self.current_config + "_linux.yaml")
+                rm.rm("Configs/" + self.current_config + "_ovs.yaml")
+            if exists("Configs/Alt_configs/" + self.current_config + "_linux.yaml"):
+                rm.rm("Configs/Alt_configs/" + self.current_config + "_linux.yaml")
             write_to_file("Configs/" + self.current_config + "_linux.yaml",
                           {"network_config": self.linux_current_config_objects})
             write_to_file("Configs/Alt_configs/" + self.current_config + "_ovs.yaml",
                           {"network_config": self.ovs_current_config_objects})
         else:
             if exists("Configs/" + self.current_config + "_linux.yaml"):
-                remove("Configs/" + self.current_config + "_linux.yaml")
-            if exists("Configs/Alt_configs" + self.current_config + "_ovs.yaml"):
-                remove("Configs/" + self.current_config + "_ovs.yaml")
+                rm.rm("Configs/" + self.current_config + "_linux.yaml")
+            if exists("Configs/Alt_configs/" + self.current_config + "_ovs.yaml"):
+                rm.rm("Configs/Alt_configs/" + self.current_config + "_ovs.yaml")
             write_to_file("Configs/" + self.current_config + "_ovs.yaml",
                           {"network_config": self.ovs_current_config_objects})
             write_to_file("Configs/Alt_configs/" + self.current_config + "_linux.yaml",
@@ -85,21 +85,21 @@ class ConfigsModel(object):
     def delete_config(config_name):
         if config_name is not None:
             if exists("Configs/" + config_name + "_ovs.yaml"):
-                remove("Configs/" + config_name + "_ovs.yaml")
+                rm.rm("Configs/" + config_name + "_ovs.yaml")
             if exists("Configs/" + config_name + "_linux.yaml"):
-                remove("Configs/" + config_name + "_linux.yaml")
-            if exists("Configs/Alt_configs" + config_name + "_ovs.yaml"):
-                remove("Configs/" + config_name + "_ovs.yaml")
-            if exists("Configs/Alt_configs" + config_name + "_linux.yaml"):
-                remove("Configs/" + config_name + "_linux.yaml")
+                rm.rm("Configs/" + config_name + "_linux.yaml")
+            if exists("Configs/Alt_configs/" + config_name + "_ovs.yaml"):
+                rm.rm("Configs/" + config_name + "_ovs.yaml")
+            if exists("Configs/Alt_configs/" + config_name + "_linux.yaml"):
+                rm.rm("Configs/" + config_name + "_linux.yaml")
             if exists("Configs/Config_members/" + config_name + "_members_ovs.yaml"):
-                remove("Configs/Config_members/" + config_name + "_members_ovs.yaml")
+                rm.rm("Configs/Config_members/" + config_name + "_members_ovs.yaml")
             if exists("Configs/Config_members/" + config_name + "_members_linux.yaml"):
-                remove("Configs/Config_members/" + config_name + "_members_linux.yaml")
+                rm.rm("Configs/Config_members/" + config_name + "_members_linux.yaml")
             if exists("Configs/Alt_config_members/" + config_name + "_members_ovs.yaml"):
-                remove("Configs/Alt_config_members/" + config_name + "_members_ovs.yaml")
+                rm.rm("Configs/Alt_config_members/" + config_name + "_members_ovs.yaml")
             if exists("Configs/Alt_config_members/" + config_name + "_members_linux.yaml"):
-                remove("Configs/Alt_config_members/" + config_name + "_members_linux.yaml")
+                rm.rm("Configs/Alt_config_members/" + config_name + "_members_linux.yaml")
 
     @staticmethod
     def name_validator(name):
@@ -142,12 +142,12 @@ class ConfigsModel(object):
 
     def get_config_members(self):
         if self.current_config is not None:
-            if exists("Configs/Config_members/" + self.current_config + "_members_ovs.yaml"):
+            if exists("Configs/Config_members"):
                 temp_members = read_from_yaml("Configs/Config_members/" + self.current_config + "_members_ovs.yaml")
                 self.ovs_current_config_members = temp_members if temp_members is not None else []
                 temp_members = read_from_yaml("Configs/Config_members/" + self.current_config + "_members_linux.yaml")
                 self.linux_current_config_members = temp_members if temp_members is not None else []
-            if exists("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml"):
+            if exists("Configs/Alt_config_members"):
                 temp_members = read_from_yaml("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml")
                 self.ovs_current_config_members += temp_members if temp_members is not None else []
                 temp_members = read_from_yaml("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml")
@@ -294,14 +294,14 @@ class ConfigsFrame(InterruptFrame):
         if self.selected_config is not None:
             self.save()
             self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 9]
-            self._model.ovs_current_config_objects = read_from_yaml("Configs/" + self.configs_list.value)
+            self._model.ovs_current_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_ovs.yaml")
             if self._model.ovs_current_config_objects is None:
-                self._model.ovs_current_config_objects = read_from_yaml("Configs/Alt_configs" + self.configs_list.value)
-            # self._model.ovs_current_config_objects = self._model.ovs_current_config_objects["network_config"]
+                self._model.ovs_current_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_ovs.yaml")
+            self._model.ovs_current_config_objects = self._model.ovs_current_config_objects["network_config"]
             self._model.linux_current_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_linux.yaml")
             if self._model.linux_current_config_objects is None:
-                self._model.linux_current_config_objects = read_from_yaml("Configs/Alt_configs" + self._model.current_config + "_linux.yaml")
-            # self._model.linux_current_config_objects = self._model.linux_current_config_objects["network_config"]
+                self._model.linux_current_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_linux.yaml")
+            self._model.linux_current_config_objects = self._model.linux_current_config_objects["network_config"]
             self._model.get_config_members()
             raise NextScene("NewConfig")
 

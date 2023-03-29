@@ -54,8 +54,8 @@ def read_from_yaml(filename):
     if exists(filename):
         with open(filename, "r") as file:
             try:
-                file_dict = yaml.full_load(file)
-                return file_dict
+                file = yaml.full_load(file)
+                return file
             except yaml.YAMLError:
                 return None
     return None
@@ -63,6 +63,7 @@ def read_from_yaml(filename):
 
 def save_data(frame, data):
     write_to_file(frame + "_data.yaml", data)
+
 
 def get_frame_data(frame):
     if exists(frame.get_title() + "_data.yaml"):
@@ -74,11 +75,12 @@ def get_frame_data(frame):
                 return None
     return None
 
+
 def remove_empty_keys(empty_key_dict):
-    temp_dict = {key: value for (key, value) in empty_key_dict.items()
-                 if value is not False
-                 and value != ''
-                 and value is not None
-                 and value != []
-                 }
-    return temp_dict
+    clear_dict = {key: value for (key, value) in empty_key_dict.items()
+                  if value is not False
+                  and value != ''
+                  and value is not None
+                  and value != []
+                  }
+    return clear_dict

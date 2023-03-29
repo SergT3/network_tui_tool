@@ -100,6 +100,7 @@ class LinuxBridgeFrame(InterfaceFrame):
                 for i in self.linux_data["members"]:
                     if i["type"] == "vlan":
                         self.linux_data["members"].remove(i)
+            self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
                 if self._model.current_network_object in self._model.ovs_current_config_objects:
                     self._model.ovs_current_config_objects.remove(self._model.current_network_object)

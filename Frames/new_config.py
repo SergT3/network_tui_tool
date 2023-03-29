@@ -173,13 +173,15 @@ class NewConfigFrame(InterruptFrame):
     def update_object_list(self):
         if self._model.current_config is not None:
             self.config_name.text = self._model.current_config
+            self.object_list.options = []
             if len(self._model.ovs_current_config_objects) + len(self._model.ovs_current_config_members):
-                self.object_list.options = []
                 for i in (self._model.ovs_current_config_objects + self._model.ovs_current_config_members):
                     if i["type"] == "vlan":
-                        self.object_list.options.append(([i["vlan_id"], i["type"]], i))
+                        if ([i["vlan_id"], i["type"]], i) not in self.object_list.options:
+                            self.object_list.options.append(([i["vlan_id"], i["type"]], i))
                     else:
-                        self.object_list.options.append(([i["name"], i["type"]], i))
+                        if ([i["name"], i["type"]], i) not in self.object_list.options:
+                            self.object_list.options.append(([i["name"], i["type"]], i))
             else:
                 self.object_list.options = [(["None"], None)]
         self.object_list._required_height = len(self.object_list.options)
