@@ -120,6 +120,8 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
                     for i in self._model.linux_current_config_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.ovs_data)
+                self._model.ovs_edit_objects = []
+                self._model.linux_edit_objects = []
             self._model.edit_mode = False
             self._model.handle_ovs_object(self.ovs_data)
             self._model.handle_linux_object(self.linux_data)
