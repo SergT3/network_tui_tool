@@ -208,6 +208,8 @@ class ConfigsModel(object):
                 if "members" in i.keys():
                     if object_to_remove in i["members"]:
                         i["members"].remove(object_to_remove)
+                if not len(i["members"]):
+                    i.pop("members")
             self.ovs_members.remove(object_to_remove)
 
         if "members" in linux_object_to_remove.keys():
@@ -237,6 +239,8 @@ class ConfigsModel(object):
                     if "members" in i.keys():
                         if object_to_remove in i["members"]:
                             i["members"].remove(object_to_remove)
+                        if not len(i["members"]):
+                            i.pop("members")
             self.linux_members.remove(linux_object_to_remove)
 
     def add_interface(self):

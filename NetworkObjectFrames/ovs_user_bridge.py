@@ -93,9 +93,11 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             self.widget_dict["MemberPopUp"].save()
             if self.widget_dict["drop_member"].value is None:
                 return
-            self.member_list.append(self.widget_dict["drop_member"].value)
             self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
-            self._model.ovs_members.append(self.widget_dict["drop_member"].value)
+            vlan_with_device = self.widget_dict["drop_member"].value
+            vlan_with_device["device"] = self.widget_dict["name"].value
+            self.member_list.append(vlan_with_device)
+            self._model.ovs_members.append(vlan_with_device)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
