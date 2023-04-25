@@ -108,18 +108,18 @@ class VlanFrame(InterruptFrame):
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
                 if len(self._model.ovs_edit_objects):
-                    for i in self._model.ovs_config_objects:
+                    for i in self._model.ovs_objects:
                         if i in self._model.ovs_edit_objects:
                             i["members"].append(self.opt_data)
                 if len(self._model.linux_edit_objects):
-                    for i in self._model.linux_config_objects:
+                    for i in self._model.linux_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.opt_data)
                 self._model.ovs_edit_objects = []
                 self._model.linux_edit_objects = []
             if self._model.member_edit:
-                self._model.ovs_config_members.append(self.opt_data)
-                self._model.linux_config_members.append(self.opt_data)
+                self._model.ovs_members.append(self.opt_data)
+                self._model.linux_members.append(self.opt_data)
                 self._model.member_edit = False
             else:
                 self._model.handle_ovs_object(self.opt_data)
@@ -231,8 +231,8 @@ class VlanFrame(InterruptFrame):
 
     def get_available_devices(self):
         self.available_devices = [("None", None)]
-        if len(self._model.ovs_config_objects) != 0:
-            for net_object in self._model.ovs_config_objects:
+        if len(self._model.ovs_objects) != 0:
+            for net_object in self._model.ovs_objects:
                 if net_object["type"] in ["interface", "ovs_bond", "linux_bond", "linux_bridge", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices

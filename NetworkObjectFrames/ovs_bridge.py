@@ -67,19 +67,19 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
                 if len(self._model.ovs_edit_objects):
-                    for i in self._model.ovs_config_objects:
+                    for i in self._model.ovs_objects:
                         if i in self._model.ovs_edit_objects:
                             i["members"].append(self.ovs_data)
                 if len(self._model.linux_edit_objects):
-                    for i in self._model.linux_config_objects:
+                    for i in self._model.linux_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.linux_data)
                 self._model.ovs_edit_objects = []
                 self._model.linux_edit_objects = []
                 self._model.edit_mode = False
             if self._model.member_edit:
-                self._model.ovs_config_members.append(self.ovs_data)
-                self._model.linux_config_members.append(self.linux_data)
+                self._model.ovs_members.append(self.ovs_data)
+                self._model.linux_members.append(self.linux_data)
             else:
                 self._model.handle_ovs_object(self.ovs_data)
                 self._model.handle_linux_object(self.linux_data)
@@ -123,10 +123,10 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.fix()
 
     def get_available_members(self):
-        if len(self._model.ovs_config_objects):
-            for net_object in self._model.ovs_config_objects:
+        if len(self._model.ovs_objects):
+            for net_object in self._model.ovs_objects:
                 if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] \
                         and net_object not in self.member_list \
-                        and net_object not in self._model.ovs_config_members:
+                        and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
 

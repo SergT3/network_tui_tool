@@ -81,11 +81,11 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
         super()._on_close(choice)
 
     def get_available_members(self):
-        if len(self._model.ovs_config_objects):
-            for net_object in self._model.ovs_config_objects:
+        if len(self._model.ovs_objects):
+            for net_object in self._model.ovs_objects:
                 if net_object["type"] == "ovs_dpdk_bond" \
                         and net_object not in self.member_list \
-                        and net_object not in self._model.ovs_config_members:
+                        and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
 
     def _member_on_close(self, choice):
@@ -94,8 +94,8 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             if self.widget_dict["drop_member"].value is None:
                 return
             self.member_list.append(self.widget_dict["drop_member"].value)
-            self._model.ovs_config_objects.remove(self.widget_dict["drop_member"].value)
-            self._model.ovs_config_members.append(self.widget_dict["drop_member"].value)
+            self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
+            self._model.ovs_members.append(self.widget_dict["drop_member"].value)
             if len(self.member_list) == 1:
                 self.widget_dict["members"].options = []
             self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
@@ -103,8 +103,8 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
                                                          self.widget_dict["drop_member"].value["type"]],
                                                         self.widget_dict["drop_member"].value))
-            self._model.linux_config_objects.remove(self.widget_dict["drop_member"].value)
-            self._model.linux_config_members.append(self.widget_dict["drop_member"].value)
+            self._model.linux_objects.remove(self.widget_dict["drop_member"].value)
+            self._model.linux_members.append(self.widget_dict["drop_member"].value)
             self.widget_dict["members"]._required_height = len(self.member_list)
             self.fix()
 
@@ -113,13 +113,13 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
             self.available_members.append(self.selected_member)
             self.pop_up_members.append((self.selected_member["name"], self.selected_member))
             member_temp = ([self.selected_member["name"], self.selected_member["type"]], self.selected_member)
-            self._model.linux_config_members.remove(self.selected_member)
-            self._model.linux_config_objects.append(self.selected_member)
+            self._model.linux_members.remove(self.selected_member)
+            self._model.linux_objects.append(self.selected_member)
             if member_temp in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(member_temp)
                 self.member_list.remove(self.selected_member)
-                self._model.ovs_config_members.remove(self.selected_member)
-                self._model.ovs_config_objects.append(self.selected_member)
+                self._model.ovs_members.remove(self.selected_member)
+                self._model.ovs_objects.append(self.selected_member)
                 self.widget_dict["members"]._required_height -= 1
             if not len(self.member_list):
                 self.widget_dict["members"]._required_height = 1
