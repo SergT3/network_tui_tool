@@ -14,16 +14,17 @@ from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml
 class ConfigsModel(object):
     current_config = None
     config_list = []
-    ovs_current_config_objects = []
-    ovs_current_config_members = []
-    linux_current_config_objects = []
-    linux_current_config_members = []
+    ovs_config_objects = []
+    ovs_config_members = []
+    linux_config_objects = []
+    linux_config_members = []
     current_config_raw = None
     _ovs_checkbox = False
     _linux_checkbox = False
     _delete_list = []
     current_network_object = {}  # ovs_data
     edit_mode = False
+    member_edit = False
     nic_names = []
     ovs_edit_objects = []
     linux_edit_objects = []
@@ -67,20 +68,20 @@ class ConfigsModel(object):
             if exists("Configs/Alt_configs/" + self.current_config + "_linux.yaml"):
                 rm.rm("Configs/Alt_configs/" + self.current_config + "_linux.yaml")
             write_to_file("Configs/" + self.current_config + "_linux.yaml",
-                          {"network_config": self.linux_current_config_objects})
+                          {"network_config": self.linux_config_objects})
             write_to_file("Configs/Alt_configs/" + self.current_config + "_ovs.yaml",
-                          {"network_config": self.ovs_current_config_objects})
+                          {"network_config": self.ovs_config_objects})
         else:
             if exists("Configs/" + self.current_config + "_linux.yaml"):
                 rm.rm("Configs/" + self.current_config + "_linux.yaml")
             if exists("Configs/Alt_configs/" + self.current_config + "_ovs.yaml"):
                 rm.rm("Configs/Alt_configs/" + self.current_config + "_ovs.yaml")
             write_to_file("Configs/" + self.current_config + "_ovs.yaml",
-                          {"network_config": self.ovs_current_config_objects})
+                          {"network_config": self.ovs_config_objects})
             write_to_file("Configs/Alt_configs/" + self.current_config + "_linux.yaml",
-                          {"network_config": self.linux_current_config_objects})
-        self.ovs_current_config_objects = []
-        self.linux_current_config_objects = []
+                          {"network_config": self.linux_config_objects})
+        self.ovs_config_objects = []
+        self.linux_config_objects = []
         return
 
     @staticmethod
@@ -91,9 +92,9 @@ class ConfigsModel(object):
             if exists("Configs/" + config_name + "_linux.yaml"):
                 rm.rm("Configs/" + config_name + "_linux.yaml")
             if exists("Configs/Alt_configs/" + config_name + "_ovs.yaml"):
-                rm.rm("Configs/" + config_name + "_ovs.yaml")
+                rm.rm("Configs/Alt_configs/" + config_name + "_ovs.yaml")
             if exists("Configs/Alt_configs/" + config_name + "_linux.yaml"):
-                rm.rm("Configs/" + config_name + "_linux.yaml")
+                rm.rm("Configs/Alt_configs/" + config_name + "_linux.yaml")
             if exists("Configs/Config_members/" + config_name + "_members_ovs.yaml"):
                 rm.rm("Configs/Config_members/" + config_name + "_members_ovs.yaml")
             if exists("Configs/Config_members/" + config_name + "_members_linux.yaml"):
@@ -129,31 +130,31 @@ class ConfigsModel(object):
                 if exists("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml"):
                     rm.rm("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml")
                 write_to_file("Configs/Config_members/" + self.current_config + "_members_linux.yaml",
-                              self.ovs_current_config_members)
+                              self.ovs_config_members)
                 write_to_file("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml",
-                              self.ovs_current_config_members)
+                              self.ovs_config_members)
             else:
                 if exists("Configs/Config_members/" + self.current_config + "_members_linux.yaml"):
                     rm.rm("Configs/Config_members/" + self.current_config + "_members_linux.yaml")
                 if exists("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml"):
                     rm.rm("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml")
                 write_to_file("Configs/Config_members/" + self.current_config + "_members_ovs.yaml",
-                              self.ovs_current_config_members)
+                              self.ovs_config_members)
                 write_to_file("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml",
-                              self.ovs_current_config_members)
+                              self.ovs_config_members)
 
     def get_config_members(self):
         if self.current_config is not None:
             if exists("Configs/Config_members"):
                 temp_members = read_from_yaml("Configs/Config_members/" + self.current_config + "_members_ovs.yaml")
-                self.ovs_current_config_members = temp_members if temp_members is not None else []
+                self.ovs_config_members = temp_members if temp_members is not None else []
                 temp_members = read_from_yaml("Configs/Config_members/" + self.current_config + "_members_linux.yaml")
-                self.linux_current_config_members = temp_members if temp_members is not None else []
+                self.linux_config_members = temp_members if temp_members is not None else []
             if exists("Configs/Alt_config_members"):
                 temp_members = read_from_yaml("Configs/Alt_config_members/" + self.current_config + "_members_ovs.yaml")
-                self.ovs_current_config_members += temp_members if temp_members is not None else []
+                self.ovs_config_members += temp_members if temp_members is not None else []
                 temp_members = read_from_yaml("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml")
-                self.linux_current_config_members += temp_members if temp_members is not None else []
+                self.linux_config_members += temp_members if temp_members is not None else []
 
     def get_physical_interfaces(self):
         if exists("mapping.yaml"):
@@ -169,53 +170,74 @@ class ConfigsModel(object):
 
     def discard_config_changes(self):
         self.current_config = None
-        self.ovs_current_config_objects = []
-        self.ovs_current_config_members = []
-        self.linux_current_config_objects = []
-        self.linux_current_config_members = []
+        self.ovs_config_objects = []
+        self.ovs_config_members = []
+        self.linux_config_objects = []
+        self.linux_config_members = []
 
     def get_raw_config(self):
-        if self.ovs_current_config_objects:
-            self.current_config_raw = yaml.dump(self.ovs_current_config_objects)
+        if self.ovs_config_objects:
+            self.current_config_raw = yaml.dump(self.ovs_config_objects)
             return True
         else:
             return False
 
     def handle_ovs_object(self, data):
         if self.current_config is not None and data is not None:
-            self.ovs_current_config_objects.append(data)
+            self.ovs_config_objects.append(data)
 
     def handle_linux_object(self, data):
         if self.current_config is not None and data is not None:
-            self.linux_current_config_objects.append(data)
+            self.linux_config_objects.append(data)
 
     def remove_object(self, object_to_remove):
-        if object_to_remove in self.ovs_current_config_objects:
-            if "members" in object_to_remove.keys():
-                for i in object_to_remove["members"]:
-                    self.ovs_current_config_objects.append(i)
-                    self.ovs_current_config_members.remove(i)
-            self.ovs_current_config_objects.remove(object_to_remove)
-        if object_to_remove in self.ovs_current_config_members:
-            self.ovs_current_config_members.remove(object_to_remove)
+
         linux_object_to_remove = deepcopy(object_to_remove)
         linux_vlan_members = []
+
+        if object_to_remove in self.ovs_config_objects:
+            if "members" in object_to_remove.keys():
+                for i in object_to_remove["members"]:
+                    self.ovs_config_members.remove(i)
+                    i.pop("device")
+                    self.ovs_config_objects.append(i)
+            self.ovs_config_objects.remove(object_to_remove)
+
+        if object_to_remove in self.ovs_config_members:
+            for i in self.ovs_config_objects:
+                if "members" in i.keys():
+                    if object_to_remove in i["members"]:
+                        i["members"].remove(object_to_remove)
+            self.ovs_config_members.remove(object_to_remove)
+
         if "members" in linux_object_to_remove.keys():
             for i in linux_object_to_remove["members"]:
                 if i["type"] == "vlan":
-                    linux_vlan_members.append(i)
+                    self.linux_config_members.remove(i)
+                    self.linux_config_objects.remove(i)
                     linux_object_to_remove["members"].remove(i)
-            if linux_object_to_remove in self.linux_current_config_objects:
-                for i in linux_object_to_remove["members"]:
-                    self.linux_current_config_objects.append(i)
-                    self.linux_current_config_members.remove(i)
-                self.linux_current_config_objects.remove(linux_object_to_remove)
-            for i in self.linux_current_config_objects:
-                if i in linux_vlan_members:
                     i.pop("device")
-                    linux_vlan_members.remove(i)
-            if linux_object_to_remove in self.linux_current_config_members:
-                self.linux_current_config_members.remove(linux_object_to_remove)
+                    linux_vlan_members.append(i)
+            if not len(linux_object_to_remove["members"]):
+                linux_object_to_remove.pop("members")
+            if len(linux_vlan_members):
+                for i in linux_vlan_members:
+                    self.linux_config_objects.append(i)
+        if linux_object_to_remove in self.linux_config_objects:
+            if "members" in linux_object_to_remove.keys():
+                for i in linux_object_to_remove["members"]:
+                    self.linux_config_objects.append(i)
+                    self.linux_config_members.remove(i)
+            self.linux_config_objects.remove(linux_object_to_remove)
+        if linux_object_to_remove in self.linux_config_members:
+            if object_to_remove["type"] == "vlan":
+                self.linux_config_objects.remove(linux_object_to_remove)
+            else:
+                for i in self.linux_config_objects:
+                    if "members" in i.keys():
+                        if object_to_remove in i["members"]:
+                            i["members"].remove(object_to_remove)
+            self.linux_config_members.remove(linux_object_to_remove)
 
     def add_interface(self):
         raise NextScene("Interface")
@@ -296,14 +318,14 @@ class ConfigsFrame(InterruptFrame):
         if self.selected_config is not None:
             self.save()
             self._model.current_config = self.configs_list.value[0: len(self.configs_list.value) - 9]
-            self._model.ovs_current_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_ovs.yaml")
-            if self._model.ovs_current_config_objects is None:
-                self._model.ovs_current_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_ovs.yaml")
-            self._model.ovs_current_config_objects = self._model.ovs_current_config_objects["network_config"]
-            self._model.linux_current_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_linux.yaml")
-            if self._model.linux_current_config_objects is None:
-                self._model.linux_current_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_linux.yaml")
-            self._model.linux_current_config_objects = self._model.linux_current_config_objects["network_config"]
+            self._model.ovs_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_ovs.yaml")
+            if self._model.ovs_config_objects is None:
+                self._model.ovs_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_ovs.yaml")
+            self._model.ovs_config_objects = self._model.ovs_config_objects["network_config"]
+            self._model.linux_config_objects = read_from_yaml("Configs/" + self._model.current_config + "_linux.yaml")
+            if self._model.linux_config_objects is None:
+                self._model.linux_config_objects = read_from_yaml("Configs/Alt_configs/" + self._model.current_config + "_linux.yaml")
+            self._model.linux_config_objects = self._model.linux_config_objects["network_config"]
             self._model.get_config_members()
             raise NextScene("NewConfig")
 

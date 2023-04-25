@@ -108,19 +108,24 @@ class VlanFrame(InterruptFrame):
             self.opt_data = remove_empty_keys(self.opt_data)
             if self._model.edit_mode:
                 if len(self._model.ovs_edit_objects):
-                    for i in self._model.ovs_current_config_objects:
+                    for i in self._model.ovs_config_objects:
                         if i in self._model.ovs_edit_objects:
                             i["members"].append(self.opt_data)
                 if len(self._model.linux_edit_objects):
-                    for i in self._model.linux_current_config_objects:
+                    for i in self._model.linux_config_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.opt_data)
                 self._model.ovs_edit_objects = []
                 self._model.linux_edit_objects = []
-            self._model.edit_mode = False
-            self._model.handle_ovs_object(self.opt_data)
-            self._model.handle_linux_object(self.opt_data)
-            self._model.current_network_object = {}
+            if self._model.member_edit:
+                self._model.ovs_config_members.append(self.opt_data)
+                self._model.linux_config_members.append(self.opt_data)
+                self._model.member_edit = False
+            else:
+                self._model.handle_ovs_object(self.opt_data)
+                self._model.handle_linux_object(self.opt_data)
+                self._model.write_config_members()
+                self._model.current_network_object = {}
             raise NextScene("NewConfig")
 
     def _save_update(self):
@@ -132,7 +137,8 @@ class VlanFrame(InterruptFrame):
         self.scene.add_effect(self.pop_up)
 
     def _cancel(self):
-        self._model.current_network_object = {}
+        if not self._model.edit_mode:
+            self._model.current_network_object = {}
         self._model.edit_mode = False
         raise NextScene("NewConfig")
 
@@ -225,8 +231,8 @@ class VlanFrame(InterruptFrame):
 
     def get_available_devices(self):
         self.available_devices = [("None", None)]
-        if len(self._model.ovs_current_config_objects) != 0:
-            for net_object in self._model.ovs_current_config_objects:
+        if len(self._model.ovs_config_objects) != 0:
+            for net_object in self._model.ovs_config_objects:
                 if net_object["type"] in ["interface", "ovs_bond", "linux_bond", "linux_bridge", "linux_bond"]:
                     self.available_devices.append((net_object["name"], net_object["name"]))
         self.widget_dict["device"].options = self.available_devices

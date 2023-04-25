@@ -26,16 +26,6 @@ ModelForFrame = {
     "MappingsFrame": MappingsModel,
     "NICFrame": None,
     "DevicesFrame": None,
-    # "InterfaceFrame": InterfaceModel,
-    # "VlanFrame": VlanModel,
-    # "LinuxBridgeFrame": LinuxBridgeModel,
-    # "LinuxBondFrame": LinuxBondModel,
-    # "OVSBridgeFrame": OVSBridgeModel,
-    # "OVSBondFrame": OVSBondModel,
-    # "OVSUserBridgeFrame": OVSUserBridgeModel,
-    # "OVSDpdkBondFrame": OVSDpdkBondModel,
-    # "OVSDpdkPortFrame": OVSDpdkPortModel
-    # "StartFrame": None
 }
 
 NetworkObjects = ["Interface", "Vlan", "LinuxBridge", "LinuxBond", "OVSBridge",

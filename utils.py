@@ -27,15 +27,15 @@ def to_asciimatics_list(python_list, dropdown=False):
 def indexed_dup_list(name, size):
     nic_list = []
     for i in range(size):
-        nic_list.append(name + str(i))
+        nic_list.append(name + str(i + 1))
     return nic_list
 
 
-def extended_dup_list(python_list, extension):
-    extended_list = []
-    for i in range(len(python_list)):
-        extended_list.append((python_list[i], python_list + extension))
-    return extended_list
+# def extended_dup_list(python_list, extension):
+#     extended_list = []
+#     for i in range(len(python_list)):
+#         extended_list.append((python_list[i], python_list + extension))
+#     return extended_list
 
 
 def write_to_file(filename, data, open_type='w'):
