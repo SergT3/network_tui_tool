@@ -153,7 +153,7 @@ class LinuxBridgeFrame(InterfaceFrame):
             self.member_list.append(vlan_with_device)
             self._model.ovs_members.append(vlan_with_device)
         if len(self.member_list) == 1:
-                self.widget_dict["members"].options = []
+            self.widget_dict["members"].options = []
             if self.widget_dict["drop_member"].value["type"] == "vlan":
                 self.pop_up_members.remove((self.widget_dict["drop_member"].value["vlan_id"],
                                             self.widget_dict["drop_member"].value))

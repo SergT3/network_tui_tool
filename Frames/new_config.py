@@ -1,4 +1,5 @@
 # from copy import deepcopy
+from copy import deepcopy
 from os.path import exists
 
 from asciimatics.exceptions import NextScene
@@ -104,7 +105,6 @@ class NewConfigFrame(InterruptFrame):
     def _edit(self):
         if self.selected_object is not None:
             if self.selected_object in self._model.ovs_members:
-                self._model.member_edit = True
                 for i in self._model.ovs_objects:
                     if self.selected_object in i["members"]:
                         i["members"].remove(self.selected_object)
@@ -113,22 +113,33 @@ class NewConfigFrame(InterruptFrame):
             elif self.selected_object in self._model.ovs_objects:
                 self._model.ovs_objects.remove(self.selected_object)
 
-            if self.selected_object in self._model.linux_members:
-                if self.selected_object["type"] == "vlan":
-                    self._model.linux_objects.remove(self.selected_object)
-                    self._model.linux_members.remove(self.selected_object)
+            linux_selected_object = deepcopy(self.selected_object)
+            if "members" in linux_selected_object.keys():
+                for i in linux_selected_object["members"]:
+                    if i["type"] == "vlan":
+                        linux_selected_object["members"].remove(i)
+                if not len(linux_selected_object["members"]):
+                    linux_selected_object.pop("members")
+
+            if linux_selected_object in self._model.linux_members:
+                if linux_selected_object["type"] == "vlan":
+                    self._model.linux_objects.remove(linux_selected_object)
+                    self._model.linux_members.remove(linux_selected_object)
                 else:
                     for i in self._model.linux_objects:
-                        if self.selected_object in i["members"]:
-                            i["members"].remove(self.selected_object)
+                        if linux_selected_object in i["members"]:
+                            i["members"].remove(linux_selected_object)
                             self._model.linux_edit_objects.append(i)
-                    self._model.linux_members.remove(self.selected_object)
-            elif self.selected_object in self._model.linux_objects:
-                self._model.linux_objects.remove(self.selected_object)
+                    self._model.linux_members.remove(linux_selected_object)
+
+            elif linux_selected_object in self._model.linux_objects:
+                self._model.linux_objects.remove(linux_selected_object)
+
             self._model.edit_mode = True
             self._model.current_network_object = self.selected_object
             obj_type = self._model.current_network_object["type"]
             self.selected_object = None
+
             if obj_type == "interface":
                 raise NextScene("Interface")
             if obj_type == "vlan":
