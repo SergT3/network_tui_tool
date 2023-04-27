@@ -72,7 +72,7 @@ class InterfaceFrame(InterruptFrame):
     def add_common_attr(self):
         for i in common_text:
             if i == "name" and self.get_title() == "Interface":
-                self._model.get_physical_interfaces()
+                self._model.get_interface_names()
                 self.widget_dict[i] = DropdownList(to_asciimatics_list(self._model.nic_names), label=i, name=i)
                 self.layout1.add_widget(self.widget_dict[i])
             else:

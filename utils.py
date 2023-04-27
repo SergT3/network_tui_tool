@@ -1,5 +1,7 @@
 import glob
+from copy import deepcopy
 from os.path import exists
+from os import chdir
 import netifaces
 import yaml
 
@@ -10,8 +12,9 @@ def list_files(pattern):
 
 def get_interfaces():
     interface_list = netifaces.interfaces()
-    while "lo" in interface_list:
-        interface_list.remove("lo")
+    for i in interface_list:
+        if not exists("/sys/class/net/" + i + "/device"):
+            interface_list.remove(i)
     return interface_list
 
 
@@ -57,21 +60,6 @@ def read_from_yaml(filename):
                 file = yaml.full_load(file)
                 return file
             except yaml.YAMLError:
-                return None
-    return None
-
-
-def save_data(frame, data):
-    write_to_file(frame + "_data.yaml", data)
-
-
-def get_frame_data(frame):
-    if exists(frame.get_title() + "_data.yaml"):
-        with open(frame.get_title() + "_data.yaml", "r") as file:
-            try:
-                frame_data = yaml.full_load(file)
-                return frame_data
-            except yaml.YAMLError or KeyError:
                 return None
     return None
 

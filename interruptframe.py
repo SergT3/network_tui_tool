@@ -5,14 +5,13 @@ from future.utils import with_metaclass
 
 
 class InterruptFrame(with_metaclass(ABCMeta, Frame)):
-    def __init__(self, screen, _data, model=None):
+    def __init__(self, screen, model=None):
         super(InterruptFrame, self).__init__(screen,
                                              screen.height,
                                              screen.width,
                                              on_load=self._on_load if hasattr(self, "_on_load") else None,
                                              has_border=True,
-                                             title=self.get_title(),
-                                             data=_data)
+                                             title=self.get_title())
         self._screen = screen
         self._model = model
         self.init_layout()

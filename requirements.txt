@@ -2,3 +2,5 @@ asciimatics==1.13.0
 PyYAML==6.0
 rm=2020.12.3
 netifaces==0.11.0
+rm==2020.12.3
+future==0.18.2

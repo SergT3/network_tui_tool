@@ -1,12 +1,17 @@
+from copy import deepcopy
+
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text, Label
-
 from interruptframe import InterruptFrame
-from utils import get_interfaces, to_asciimatics_list, indexed_dup_list, write_to_file, save_data
+from utils import get_interfaces, to_asciimatics_list, indexed_dup_list, write_to_file, read_from_yaml
+from os.path import exists
 
 
 class MappingsModel(object):
 
+    nic_list = []
+    nic_show_list = []
+    hardware_objects = []
     @staticmethod
     def remove_nic(nic_list, nic_name):
         while (nic_name, nic_name) in nic_list:
@@ -18,9 +23,23 @@ class MappingsModel(object):
         interface_dict = {}
         mapping_dict = {}
         for i in range(1, length + 1):
-            mapping_dict[data[str(-i)]] = data[str(i)]
+            if data[str(-i)] is not None:
+                mapping_dict[data[str(-i)]] = data[str(i)]
         interface_dict["interface_mapping"] = mapping_dict
         return write_to_file("mapping.yaml", interface_dict)
+
+    @staticmethod
+    def save_custom_nics(custom_nics):
+        write_to_file("custom_nics.yaml", custom_nics)
+
+    @staticmethod
+    def get_nics(dropdown=False):
+        nic_list = []
+        if dropdown:
+            nic_list.append(("None", None))
+        if exists("custom_nics.yaml"):
+            return nic_list + read_from_yaml("custom_nics.yaml")
+        return []
 
 
 class MappingsFrame(InterruptFrame):
@@ -37,28 +56,17 @@ class MappingsFrame(InterruptFrame):
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
         layout2 = Layout([1, 1, 1, 1, 1], True)
         self.add_layout(layout2)
-        self.hardware_objects = to_asciimatics_list(get_interfaces())
-        try:
-            self.nic_list = self.data["nic_list"]
-        except KeyError:
-            self.nic_list = None
-        try:
-            self.nic_show_list = self.data["nic_show_list"]
-        except KeyError:
-            self.nic_show_list = None
-        if self.nic_list is None:
-            self.nic_list = to_asciimatics_list(indexed_dup_list("nic", len(self.hardware_objects)), True)
-        if self.nic_show_list is None:
-            self.nic_show_list = to_asciimatics_list(indexed_dup_list("nic", len(self.hardware_objects)))
         layout2.add_widget(Label("Interface mappings:"))
         layout2.add_widget(Divider(1), 1)
-        for i in range(1, len(self.hardware_objects) + 1):
-            self.widget_dict[str(i)] = ListBox(1, [self.hardware_objects[i - 1]], name=str(i))
-            self.widget_dict[str(-i)] = DropdownList(self.nic_list, on_change=self._on_change, name=str(-i))
+        self._on_load()
+        for i in range(1, len(self._model.hardware_objects) + 1):
+            self.widget_dict[str(i)] = ListBox(1, [self._model.hardware_objects[i - 1]], name=str(i))
+            self.widget_dict[str(-i)] = DropdownList(self._model.nic_list, on_change=self._on_change, name=str(-i))
             layout2.add_widget(self.widget_dict[str(i)])
             layout2.add_widget(self.widget_dict[str(-i)], 1)
+        self.fill_nics()
         layout2.add_widget(Label("Identifiers:"), 4)
-        self._nic_menu = ListBox(len(self.nic_show_list), self.nic_show_list, on_select=self._show,
+        self._nic_menu = ListBox(len(self._model.nic_show_list), self._model.nic_show_list, on_select=self._show,
                                  name="nic_menu", add_scroll_bar=True)
         layout2.add_widget(self._nic_menu, 4)
         layout3 = Layout([1, 1, 1, 1])
@@ -70,13 +78,21 @@ class MappingsFrame(InterruptFrame):
         self.fix()
 
     def _on_load(self):
-        try:
-            if self.data["nic_list"]:
-                self.nic_list = self.data["nic_list"]
-            if self.data["nic_show_list"]:
-                self.nic_show_list = self.data["nic_show_list"]
-        except KeyError:
-            return
+        self._model.hardware_objects = to_asciimatics_list(get_interfaces())
+        self._model.nic_list = self._model.get_nics(True)
+        self._model.nic_show_list = self._model.get_nics()
+        if not self._model.nic_list or not self._model.nic_show_list:
+            self._model.nic_list = to_asciimatics_list(indexed_dup_list("nic", len(self._model.hardware_objects)), True)
+            self._model.nic_show_list = to_asciimatics_list(indexed_dup_list("nic", len(self._model.hardware_objects)))
+
+    def fill_nics(self):
+        if exists("mapping.yaml"):
+            mapping_dict = read_from_yaml("mapping.yaml")["interface_mapping"]
+            for i in range(1, len(self._model.hardware_objects)):
+                for j in mapping_dict:
+                    if self.widget_dict[str(i)].value == mapping_dict[j]:
+                        self.widget_dict[str(-i)].value = j
+                        break
 
     def _on_select(self):
         self.save()
@@ -90,10 +106,10 @@ class MappingsFrame(InterruptFrame):
 
     def _save_update(self):
         self.save()
-        self._model.mapping_writer(self.data, len(self.hardware_objects))
-        self.data["nic_list"] = self.nic_list
-        self.data["nic_show_list"] = self.nic_show_list
-        save_data(self.get_title(), self.data)
+        self._model.mapping_writer(self.data, len(self._model.hardware_objects))
+        self.data["nic_list"] = self._model.nic_list
+        self.data["nic_show_list"] = self._model.nic_show_list
+        self._model.save_custom_nics(self._model.nic_show_list)
         raise NextScene("Home")
 
     def _add(self):
@@ -106,10 +122,10 @@ class MappingsFrame(InterruptFrame):
     def _on_close(self, choice):
         if choice == 0:
             self.pop_up.save()
-            self.nic_list.append((self.pop_up.data["newname"], self.pop_up.data["newname"]))
-            self.nic_show_list.append((self.pop_up.data["newname"], self.pop_up.data["newname"]))
-            for i in range(1, len(self.hardware_objects) + 1):
-                self.widget_dict[str(-i)].options = self.nic_list
+            self._model.nic_list.append((self.pop_up.data["newname"], self.pop_up.data["newname"]))
+            self._model.nic_show_list.append((self.pop_up.data["newname"], self.pop_up.data["newname"]))
+            for i in range(1, len(self._model.hardware_objects) + 1):
+                self.widget_dict[str(-i)].options = self._model.nic_list
             self._nic_menu.options = self.nic_show_list
             self._nic_menu._required_height += 1
             self.fix()
@@ -118,11 +134,11 @@ class MappingsFrame(InterruptFrame):
 
     def _delete(self):
         if self._selected_nic is not None:
-            self._model.remove_nic(self.nic_list, self._selected_nic)
-            self._model.remove_nic(self.nic_show_list, self._selected_nic)
+            self._model.remove_nic(self._model.nic_list, self._selected_nic)
+            self._model.remove_nic(self._model.nic_show_list, self._selected_nic)
             self.save()
-            for i in range(1, len(self.hardware_objects) + 1):
-                self.widget_dict[str(-i)].options = self.nic_list
+            for i in range(1, len(self._model.hardware_objects) + 1):
+                self.widget_dict[str(-i)].options = self._model.nic_list
             self._nic_menu.options = self.nic_show_list
             self._nic_menu._required_height -= 1
             self.fix()

@@ -18,7 +18,6 @@ from Frames.home import HomeFrame
 from Frames.mappings import MappingsFrame, MappingsModel
 from Frames.new_config import NewConfigFrame
 from Frames.raw import RawFrame
-from utils import get_frame_data
 
 ModelForFrame = {
     # DevicesFrame: DevicesModel  here maybe "update devices" button will be added
@@ -52,10 +51,10 @@ class NetConfig(object):
             #        scene_obj = Scene(frame.effects, 0)
             if frame.get_title() == "Configs" or frame.get_title() == "NewConfig"\
                     or frame.get_title() == "Raw" or frame.get_title() in NetworkObjects:
-                scene_obj = Scene([frame(screen, get_frame_data(frame),
+                scene_obj = Scene([frame(screen,
                                          model=shared_configs_model)], name=frame.get_title())
             else:
-                scene_obj = Scene([frame(screen, get_frame_data(frame),
+                scene_obj = Scene([frame(screen,
                                          model=ModelForFrame[frame.get_title() + "Frame"])], -1, name=frame.get_title())
             self.scenes.append(scene_obj)
             self.scenes_by_name[frame.get_title()] = scene_obj

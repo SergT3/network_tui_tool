@@ -8,7 +8,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
 from interruptframe import InterruptFrame
-from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml, remove_empty_keys
+from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml, get_interfaces
 
 
 class ConfigsModel(object):
@@ -156,14 +156,13 @@ class ConfigsModel(object):
                 temp_members = read_from_yaml("Configs/Alt_config_members/" + self.current_config + "_members_linux.yaml")
                 self.linux_members += temp_members if temp_members is not None else []
 
-    def get_physical_interfaces(self):
+    def get_interface_names(self):
         if exists("mapping.yaml"):
             mappings_dict = read_from_yaml("mapping.yaml")["interface_mapping"]
             nic_list = []
             for i in mappings_dict:
                 nic_list.append(i)
-            for i in mappings_dict:
-                nic_list.append(mappings_dict[i])
+            nic_list += get_interfaces()
             self.nic_names = nic_list
 
     # Methods for NewConfig
