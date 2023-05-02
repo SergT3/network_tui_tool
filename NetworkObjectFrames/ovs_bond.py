@@ -96,6 +96,14 @@ class OVSBondFrame(LinuxBondFrame):
         self.widget_dict["OptionPopUp"].fix()
         self.scene.add_effect(self.widget_dict["OptionPopUp"])
 
+    def get_available_members(self):
+        if len(self._model.ovs_objects):
+            for net_object in self._model.ovs_objects:
+                if net_object["type"] in ["interface", "ovs_bridge", "vlan"] \
+                        and net_object not in self.member_list \
+                        and net_object not in self._model.ovs_members:
+                    self.available_members.append(net_object)
+
     def _option_on_close(self, choice):
         if choice == 0:
             self.widget_dict["OptionPopUp"].save()

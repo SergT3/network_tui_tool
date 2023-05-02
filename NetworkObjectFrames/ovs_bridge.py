@@ -125,7 +125,7 @@ class OVSBridgeFrame(LinuxBridgeFrame):
     def get_available_members(self):
         if len(self._model.ovs_objects):
             for net_object in self._model.ovs_objects:
-                if net_object["type"] in ["interface", "linux_bond", "ovs_bond"] \
+                if net_object["type"] in ["interface", "ovs_bond", "vlan"] \
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)

@@ -5,7 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpD
 
 from NetworkObjectFrames.interface import InterfaceFrame
 from NetworkObjectFrames.network_object_attributes import linux_bond
-from utils import remove_empty_keys
+from utils import remove_empty_keys, write_to_file
 
 
 class LinuxBondFrame(InterfaceFrame):
@@ -115,11 +115,11 @@ class LinuxBondFrame(InterfaceFrame):
                         self.linux_data["members"].remove(i)
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
-                if len(self._model.ovs_edit_objects):
+                if self._model.ovs_edit_objects:
                     for i in self._model.ovs_objects:
                         if i in self._model.ovs_edit_objects:
                             i["members"].append(self.ovs_data)
-                if len(self._model.linux_edit_objects):
+                if self._model.linux_edit_objects:
                     for i in self._model.linux_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.linux_data)
@@ -139,7 +139,7 @@ class LinuxBondFrame(InterfaceFrame):
     def get_available_members(self):
         if len(self._model.ovs_objects):
             for net_object in self._model.ovs_objects:
-                if net_object["type"] in ["interface", "bridge", "vlan"] \
+                if net_object["type"] in ["interface", "linux_bridge", "vlan"] \
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
@@ -161,7 +161,7 @@ class LinuxBondFrame(InterfaceFrame):
             if self.widget_dict["drop_member"].value is None:
                 return
             self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
-            vlan_with_device = self.widget_dict["drop_member"].value
+            vlan_with_device = deepcopy(self.widget_dict["drop_member"].value)
             vlan_with_device["device"] = self.widget_dict["name"].value
             self.member_list.append(vlan_with_device)
             self._model.ovs_members.append(vlan_with_device)
@@ -174,12 +174,15 @@ class LinuxBondFrame(InterfaceFrame):
                                                              self.widget_dict["drop_member"].value["type"],
                                                              self.widget_dict["drop_member"].value["mtu"]],
                                                             self.widget_dict["drop_member"].value))
+
                 for i in self._model.linux_objects:
                     if i == self.widget_dict["drop_member"].value:
-                        i["device"] = self.widget_dict["name"].value
+                        self._model.linux_objects.remove(i)
+                        self._model.linux_objects.append(vlan_with_device)
                 for i in self._model.linux_members:
                     if i == self.widget_dict["drop_member"].value:
-                        i["device"] = self.widget_dict["name"].value
+                        self._model.linux_members.remove(i)
+                        self._model.linux_members.append(vlan_with_device)
             else:
                 self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
                                             self.widget_dict["drop_member"].value))

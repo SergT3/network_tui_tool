@@ -288,10 +288,11 @@ class InterfaceFrame(InterruptFrame):
             raise NextScene("NewConfig")
 
     def _cancel(self):
-        if not self._model.edit_mode:
+        if self._model.edit_mode:
+            self._on_close(0)
+        else:
             self._model.current_network_object = {}
-        self._model.edit_mode = False
-        raise NextScene("NewConfig")
+            raise NextScene("NewConfig")
 
     def _add_address(self):
         self.widget_dict["AddressPopUp"] = PopUpDialog(self._screen, "Enter new address",

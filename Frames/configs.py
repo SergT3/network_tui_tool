@@ -224,16 +224,19 @@ class ConfigsModel(object):
             if len(linux_vlan_members):
                 for i in linux_vlan_members:
                     self.linux_objects.append(i)
-        if linux_object_to_remove in self.linux_objects and linux_object_to_remove["type"] != "vlan":
-            if "members" in linux_object_to_remove.keys():
-                for i in linux_object_to_remove["members"]:
-                    self.linux_objects.append(i)
-                    self.linux_members.remove(i)
-            self.linux_objects.remove(linux_object_to_remove)
-        if linux_object_to_remove in self.linux_members:
-            if object_to_remove["type"] == "vlan":
+        if linux_object_to_remove in self.linux_objects:
+            if linux_object_to_remove["type"] == "vlan":
+                if "device" in linux_object_to_remove.keys():
+                    self.linux_members.remove(linux_object_to_remove)
                 self.linux_objects.remove(linux_object_to_remove)
             else:
+                if "members" in linux_object_to_remove.keys():
+                    for i in linux_object_to_remove["members"]:
+                        self.linux_objects.append(i)
+                        self.linux_members.remove(i)
+                self.linux_objects.remove(linux_object_to_remove)
+        if linux_object_to_remove in self.linux_members:
+            if linux_object_to_remove["type"] != "vlan":
                 for i in self.linux_objects:
                     if "members" in i.keys():
                         if object_to_remove in i["members"]:

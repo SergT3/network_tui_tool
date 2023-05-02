@@ -1,11 +1,11 @@
 # from copy import deepcopy
 from copy import deepcopy
-from os.path import exists
 
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
 
 from interruptframe import InterruptFrame
+from utils import write_to_file
 
 
 class NewConfigFrame(InterruptFrame):
@@ -79,6 +79,9 @@ class NewConfigFrame(InterruptFrame):
                                                   self._model.current_network_object["type"]],
                                                  self._model.current_network_object))
             self._model.current_network_object = {}
+        if self.object_list.options != [(["None"], None)]:
+            if (["None"], None) in self.object_list.options:
+                self.object_list.options.remove((["None"], None))
         self.object_list._required_height = len(self.object_list.options)
         self.fix()
         self.ovs_box.value = False
@@ -118,7 +121,7 @@ class NewConfigFrame(InterruptFrame):
                 for i in linux_selected_object["members"]:
                     if i["type"] == "vlan":
                         linux_selected_object["members"].remove(i)
-                if not len(linux_selected_object["members"]):
+                if not linux_selected_object["members"]:
                     linux_selected_object.pop("members")
 
             if linux_selected_object in self._model.linux_members:
@@ -217,8 +220,9 @@ class NewConfigFrame(InterruptFrame):
         if self._model.current_config is not None:
             self.config_name.text = self._model.current_config
             self.object_list.options = []
-            if len(self._model.ovs_objects) + len(self._model.ovs_members):
+            if self._model.ovs_objects or self._model.ovs_members:
                 for i in (self._model.ovs_objects + self._model.ovs_members):
+                    write_to_file("example", self._model.ovs_objects + self._model.ovs_members)
                     if i["type"] == "vlan":
                         if ([i["vlan_id"], i["type"]], i) not in self.object_list.options:
                             self.object_list.options.append(([i["vlan_id"], i["type"]], i))
