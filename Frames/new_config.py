@@ -191,7 +191,7 @@ class NewConfigFrame(InterruptFrame):
         if choice == 0:
             self._model.write_config(self.linux_mode.value)
             self._model.write_config_members(self.linux_mode.value)
-            self._model.current_config = None
+            self._model.current_config_name = None
             self._model.ovs_objects = []
             self._model.ovs_members = []
             self._model.linux_objects = []
@@ -217,12 +217,11 @@ class NewConfigFrame(InterruptFrame):
         raise NextScene("Configs")
 
     def update_object_list(self):
-        if self._model.current_config is not None:
-            self.config_name.text = self._model.current_config
+        if self._model.current_config_name is not None:
+            self.config_name.text = self._model.current_config_name
             self.object_list.options = []
             if self._model.ovs_objects or self._model.ovs_members:
                 for i in (self._model.ovs_objects + self._model.ovs_members):
-                    write_to_file("example", self._model.ovs_objects + self._model.ovs_members)
                     if i["type"] == "vlan":
                         if ([i["vlan_id"], i["type"]], i) not in self.object_list.options:
                             self.object_list.options.append(([i["vlan_id"], i["type"]], i))

@@ -61,6 +61,7 @@ class VlanFrame(InterruptFrame):
         self.fix()
 
     def _on_load(self):
+        self.data["type"] = "vlan"
         self.get_available_devices()
         if self._model.current_network_object == {}:
             for i in vlan_text:

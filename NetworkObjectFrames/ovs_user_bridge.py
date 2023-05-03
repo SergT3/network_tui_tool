@@ -37,6 +37,7 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
         self.fix()
 
     def _on_load(self):
+        self.data["type"] = "ovs_user_bridge"
         self.get_available_members()
         self.pop_up_members = []
         if len(self.available_members):
@@ -65,9 +66,11 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
                 if i == "members":
                     if "members" in self._model.current_network_object:
                         self.widget_dict[i].options = []
-                        if self.member_list is not None and len(self.member_list):
+                        if self.member_list:
+                            # if self.member_list is not None and self.member_list:
+
                             for j in self.member_list:
-                                self.widget_dict[i].options.append(([j["name"], j["type"]], j))
+                                self.widget_dict[i].options.append(([j["name"], j["type"], j["mtu"]], j))
                                 self.widget_dict[i]._required_height = len(self.member_list)
                     else:
                         self.widget_dict[i]._required_height = 1
@@ -81,40 +84,41 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
         super()._on_close(choice)
 
     def get_available_members(self):
-        if len(self._model.ovs_objects):
+        if self._model.ovs_objects:
             for net_object in self._model.ovs_objects:
                 if net_object["type"] == "ovs_dpdk_bond" \
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
 
-    def _member_on_close(self, choice):
-        if choice == 0:
-            self.widget_dict["MemberPopUp"].save()
-            if self.widget_dict["drop_member"].value is None:
-                return
-            self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
-            vlan_with_device = self.widget_dict["drop_member"].value
-            vlan_with_device["device"] = self.widget_dict["name"].value
-            self.member_list.append(vlan_with_device)
-            self._model.ovs_members.append(vlan_with_device)
-            if len(self.member_list) == 1:
-                self.widget_dict["members"].options = []
-            self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
-                                        self.widget_dict["drop_member"].value))
-            self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
-                                                         self.widget_dict["drop_member"].value["type"]],
-                                                        self.widget_dict["drop_member"].value))
-            self._model.linux_objects.remove(self.widget_dict["drop_member"].value)
-            self._model.linux_members.append(self.widget_dict["drop_member"].value)
-            self.widget_dict["members"]._required_height = len(self.member_list)
-            self.fix()
+    # def _member_on_close(self, choice):
+    #     if choice == 0:
+    #         self.widget_dict["MemberPopUp"].save()
+    #         if self.widget_dict["drop_member"].value is None:
+    #             return
+    #         self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
+    #         vlan_with_device = self.widget_dict["drop_member"].value
+    #         vlan_with_device["device"] = self.widget_dict["name"].value
+    #         self.member_list.append(vlan_with_device)
+    #         self._model.ovs_members.append(vlan_with_device)
+    #         if len(self.member_list) == 1:
+    #             self.widget_dict["members"].options = []
+    #         self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
+    #                                     self.widget_dict["drop_member"].value))
+    #         self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
+    #                                                      self.widget_dict["drop_member"].value["type"]],
+    #                                                     self.widget_dict["drop_member"].value))
+    #         self._model.linux_objects.remove(self.widget_dict["drop_member"].value)
+    #         self._model.linux_members.append(self.widget_dict["drop_member"].value)
+    #         self.widget_dict["members"]._required_height = len(self.member_list)
+    #         self.fix()
 
     def _delete_member(self):
         if self.selected_member is not None:
             self.available_members.append(self.selected_member)
             self.pop_up_members.append((self.selected_member["name"], self.selected_member))
-            member_temp = ([self.selected_member["name"], self.selected_member["type"]], self.selected_member)
+            member_temp = ([self.selected_member["name"], self.selected_member["type"],
+                            self.selected_member["mtu"]], self.selected_member)
             self._model.linux_members.remove(self.selected_member)
             self._model.linux_objects.append(self.selected_member)
             if member_temp in self.widget_dict["members"].options:

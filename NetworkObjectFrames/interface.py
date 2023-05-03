@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
 from interruptframe import InterruptFrame
-from utils import remove_empty_keys, to_asciimatics_list
+from utils import remove_empty_keys, to_asciimatics_list, write_to_file
 
 
 class InterfaceFrame(InterruptFrame):
@@ -47,7 +47,66 @@ class InterfaceFrame(InterruptFrame):
         layout2.add_widget(Button("Cancel", self._cancel), 3)
         self.fix()
 
+    def _member_on_close(self, choice):
+        if choice == 0:
+            self.widget_dict["MemberPopUp"].save()
+            if self.widget_dict["drop_member"].value is None:
+                return
+
+            linux_member = deepcopy(self.widget_dict["drop_member"].value)
+            if "members" in linux_member.keys():
+                for i in linux_member["members"]:
+                    if i["type"] == "vlan":
+                        linux_member["members"].remove(i)
+                    if not linux_member["members"]:
+                        linux_member.pop("members")
+            write_to_file("example", linux_member)
+
+            if len(self.member_list) == [(["None"], None)]:
+                self.widget_dict["members"].options = []
+            if self.widget_dict["drop_member"].value["type"] == "vlan":
+                self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
+                vlan_with_device = deepcopy(self.widget_dict["drop_member"].value)
+                vlan_with_device["device"] = self.widget_dict["name"].value
+                self.member_list.append(vlan_with_device)
+                self._model.ovs_members.append(vlan_with_device)
+                self.pop_up_members.remove((self.widget_dict["drop_member"].value["vlan_id"],
+                                            self.widget_dict["drop_member"].value))
+                self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["vlan_id"],
+                                                             self.widget_dict["drop_member"].value["type"],
+                                                             self.widget_dict["drop_member"].value["mtu"]],
+                                                            self.widget_dict["drop_member"].value))
+            else:
+                self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
+                self.member_list.append(self.widget_dict["drop_member"].value)
+                self._model.ovs_members.append(self.widget_dict["drop_member"].value)
+                self.pop_up_members.remove((self.widget_dict["drop_member"].value["name"],
+                                            self.widget_dict["drop_member"].value))
+                self.widget_dict["members"].options.append(([self.widget_dict["drop_member"].value["name"],
+                                                             self.widget_dict["drop_member"].value["type"],
+                                                             self.widget_dict["drop_member"].value["mtu"]],
+                                                            self.widget_dict["drop_member"].value))
+                self._model.linux_objects.remove(linux_member)
+                self._model.linux_members.append(linux_member)
+            for i in self._model.linux_objects:
+                if i == linux_member:
+                    self._model.linux_objects.remove(i)
+                    if self.widget_dict["drop_member"].value["type"] == "vlan":
+                        self._model.linux_objects.append(vlan_with_device)
+                    else:
+                        self._model.linux_objects.append(linux_member)
+            for i in self._model.linux_members:
+                if i == linux_member:
+                    self._model.linux_members.remove(i)
+                    if self.widget_dict["drop_member"].value["type"] == "vlan":
+                        self._model.linux_members.append(vlan_with_device)
+                    else:
+                        self._model.linux_members.append(linux_member)
+            self.widget_dict["members"]._required_height = len(self.member_list)
+            self.fix()
+
     def _on_load(self):
+        self.data["type"] = "interface"
         self.fill_common_attr()
         if self._model.current_network_object == {}:
             for i in interface:
@@ -267,11 +326,11 @@ class InterfaceFrame(InterruptFrame):
             self.ovs_data["rules"] = self.rule_list
             self.ovs_data = remove_empty_keys(self.ovs_data)
             if self._model.edit_mode:
-                if len(self._model.ovs_edit_objects):
+                if self._model.ovs_edit_objects:
                     for i in self._model.ovs_objects:
                         if i in self._model.ovs_edit_objects:
                             i["members"].append(self.ovs_data)
-                if len(self._model.linux_edit_objects):
+                if self._model.linux_edit_objects:
                     for i in self._model.linux_objects:
                         if i in self._model.linux_edit_objects:
                             i["members"].append(self.ovs_data)
@@ -326,7 +385,7 @@ class InterfaceFrame(InterruptFrame):
                     (["ip_netmask:", self.selected_address["ip_netmask"]], self.selected_address))
                 self.address_list.remove(self.selected_address)
                 self.widget_dict["addresses"]._required_height -= 1
-            if not len(self.address_list):
+            if not self.address_list:
                 self.widget_dict["addresses"]._required_height = 1
                 self.widget_dict["addresses"].options = [(["None"], None)]
             self.selected_address = None

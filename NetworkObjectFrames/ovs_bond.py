@@ -86,6 +86,7 @@ class OVSBondFrame(LinuxBondFrame):
 
     def _on_load(self):
         super()._on_load()
+        self.data["type"] = "ovs_bond"
         self.fill_ovs_common_attr()
 
     def _add_option(self):

@@ -46,6 +46,7 @@ class OVSBridgeFrame(LinuxBridgeFrame):
 
     def _on_load(self):
         super()._on_load()
+        self.data["type"] = "ovs_bridge"
         self.fill_ovs_common_attr()
 
     def _on_close(self, choice):
