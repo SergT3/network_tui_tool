@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text, Label
 from interruptframe import InterruptFrame
@@ -30,15 +28,15 @@ class MappingsModel(object):
 
     @staticmethod
     def save_custom_nics(custom_nics):
-        write_to_file("custom_nics.yaml", custom_nics)
+        custom_nic_list = []
+        for i in custom_nics:
+            custom_nic_list.append(i[0])
+        write_to_file("custom_nics.yaml", custom_nic_list)
 
     @staticmethod
-    def get_nics(dropdown=False):
-        nic_list = []
-        if dropdown:
-            nic_list.append(("None", None))
+    def get_nics():
         if exists("custom_nics.yaml"):
-            return nic_list + read_from_yaml("custom_nics.yaml")
+            return read_from_yaml("custom_nics.yaml")
         return []
 
 
@@ -79,20 +77,23 @@ class MappingsFrame(InterruptFrame):
 
     def _on_load(self):
         self._model.hardware_objects = to_asciimatics_list(get_interfaces())
-        self._model.nic_list = self._model.get_nics(True)
-        self._model.nic_show_list = self._model.get_nics()
+        self._model.nic_list = to_asciimatics_list(self._model.get_nics(), True)
+        self._model.nic_show_list = to_asciimatics_list(self._model.get_nics())
         if not self._model.nic_list or not self._model.nic_show_list:
             self._model.nic_list = to_asciimatics_list(indexed_dup_list("nic", len(self._model.hardware_objects)), True)
             self._model.nic_show_list = to_asciimatics_list(indexed_dup_list("nic", len(self._model.hardware_objects)))
+        if "1" in self.widget_dict.keys():
+            self.fill_nics()
 
     def fill_nics(self):
         if exists("mapping.yaml"):
             mapping_dict = read_from_yaml("mapping.yaml")["interface_mapping"]
-            for i in range(1, len(self._model.hardware_objects)):
+            for i in range(1, len(self._model.hardware_objects) + 1):
                 for j in mapping_dict:
                     if self.widget_dict[str(i)].value == mapping_dict[j]:
                         self.widget_dict[str(-i)].value = j
                         break
+            self.fix()
 
     def _on_select(self):
         self.save()
@@ -126,7 +127,7 @@ class MappingsFrame(InterruptFrame):
             self._model.nic_show_list.append((self.pop_up.data["newname"], self.pop_up.data["newname"]))
             for i in range(1, len(self._model.hardware_objects) + 1):
                 self.widget_dict[str(-i)].options = self._model.nic_list
-            self._nic_menu.options = self.nic_show_list
+            self._nic_menu.options = self._model.nic_show_list
             self._nic_menu._required_height += 1
             self.fix()
         else:
@@ -139,7 +140,7 @@ class MappingsFrame(InterruptFrame):
             self.save()
             for i in range(1, len(self._model.hardware_objects) + 1):
                 self.widget_dict[str(-i)].options = self._model.nic_list
-            self._nic_menu.options = self.nic_show_list
+            self._nic_menu.options = self._model.nic_show_list
             self._nic_menu._required_height -= 1
             self.fix()
             self._selected_nic = None
