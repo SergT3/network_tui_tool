@@ -1,11 +1,11 @@
-# from copy import deepcopy
 from copy import deepcopy
 
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
 
 from interruptframe import InterruptFrame
-from utils import write_to_file
+
+from utils import remove_vlan_members
 
 
 class NewConfigFrame(InterruptFrame):
@@ -42,7 +42,7 @@ class NewConfigFrame(InterruptFrame):
         layout1 = Layout([1, 1, 1, 1])
         self.add_layout(layout1)
         layout1.add_widget(Button("Edit", self._edit), 0)
-        layout1.add_widget(Button("Raw", self._raw), 1)
+        # layout1.add_widget(Button("Raw", self._raw), 1)
         self.ovs_box = CheckBox("OVS", on_change=self._checkbox, name="OVS")
         self.linux_box = CheckBox("Linux", on_change=self._checkbox, name="linux")
         layout1.add_widget(self.ovs_box, 2)
@@ -117,12 +117,7 @@ class NewConfigFrame(InterruptFrame):
                 self._model.ovs_objects.remove(self.selected_object)
 
             linux_selected_object = deepcopy(self.selected_object)
-            if "members" in linux_selected_object.keys():
-                for i in linux_selected_object["members"]:
-                    if i["type"] == "vlan":
-                        linux_selected_object["members"].remove(i)
-                if not linux_selected_object["members"]:
-                    linux_selected_object.pop("members")
+            remove_vlan_members(linux_selected_object)
 
             if linux_selected_object in self._model.linux_members:
                 if linux_selected_object["type"] == "vlan":

@@ -72,3 +72,27 @@ def remove_empty_keys(empty_key_dict):
                   and value != []
                   }
     return clear_dict
+
+
+def remove_vlan_members(net_object):
+    if "members" in net_object.keys():
+        for i in net_object["members"]:
+            if i["type"] == "vlan":
+                net_object["members"].remove(i)
+            else:
+                remove_vlan_members(i)
+        if not net_object["members"]:
+            net_object.pop("members")
+
+
+def remove_deep_member(net_object, member):
+    if "members" in net_object.keys():
+        for i in net_object["members"]:
+            if i == member:
+                net_object["members"].remove(i)
+                break
+            else:
+                remove_deep_member(i, member)
+        if not net_object["members"]:
+            net_object.pop("members")
+

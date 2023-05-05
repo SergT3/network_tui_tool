@@ -5,7 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpD
 
 from NetworkObjectFrames.interface import InterfaceFrame
 from NetworkObjectFrames.network_object_attributes import linux_bond
-from utils import remove_empty_keys, write_to_file
+from utils import remove_empty_keys, write_to_file, remove_vlan_members
 
 
 class LinuxBondFrame(InterfaceFrame):
@@ -110,10 +110,7 @@ class LinuxBondFrame(InterfaceFrame):
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
-            if "members" in self.linux_data.keys():
-                for i in self.linux_data["members"]:
-                    if i["type"] == "vlan":
-                        self.linux_data["members"].remove(i)
+            remove_vlan_members(self.linux_data)
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
                 if self._model.ovs_edit_objects:

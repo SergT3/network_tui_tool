@@ -8,7 +8,8 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
 from interruptframe import InterruptFrame
-from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml, get_interfaces
+from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml, get_interfaces, remove_deep_member, \
+    remove_vlan_members
 
 
 class ConfigsModel(object):
@@ -192,7 +193,6 @@ class ConfigsModel(object):
     def remove_object(self, object_to_remove):
 
         linux_object_to_remove = deepcopy(object_to_remove)
-        linux_vlan_members = []
 
         if object_to_remove in self.ovs_objects:
             if "members" in object_to_remove.keys():
@@ -205,11 +205,7 @@ class ConfigsModel(object):
 
         if object_to_remove in self.ovs_members:
             for i in self.ovs_objects:
-                if "members" in i.keys():
-                    if object_to_remove in i["members"]:
-                        i["members"].remove(object_to_remove)
-                if not i["members"]:
-                    i.pop("members")
+                remove_deep_member(i, object_to_remove)
             self.ovs_members.remove(object_to_remove)
 
         if "members" in linux_object_to_remove.keys():
@@ -219,12 +215,12 @@ class ConfigsModel(object):
                     self.linux_objects.remove(i)
                     linux_object_to_remove["members"].remove(i)
                     i.pop("device")
-                    linux_vlan_members.append(i)
+                    self.linux_objects.append(i)
             if not linux_object_to_remove["members"]:
                 linux_object_to_remove.pop("members")
-            if linux_vlan_members:
-                for i in linux_vlan_members:
-                    self.linux_objects.append(i)
+
+        remove_vlan_members(linux_object_to_remove)
+
         if linux_object_to_remove in self.linux_objects:
             if linux_object_to_remove["type"] == "vlan":
                 if "device" in linux_object_to_remove.keys():
@@ -239,11 +235,7 @@ class ConfigsModel(object):
         if linux_object_to_remove in self.linux_members:
             if linux_object_to_remove["type"] != "vlan":
                 for i in self.linux_objects:
-                    if "members" in i.keys():
-                        if object_to_remove in i["members"]:
-                            i["members"].remove(object_to_remove)
-                        if not i["members"]:
-                            i.pop("members")
+                    remove_deep_member(i, linux_object_to_remove)
             self.linux_members.remove(linux_object_to_remove)
 
     def add_interface(self):

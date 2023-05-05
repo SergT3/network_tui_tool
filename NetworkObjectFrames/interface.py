@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
 from interruptframe import InterruptFrame
-from utils import remove_empty_keys, to_asciimatics_list, write_to_file
+from utils import remove_empty_keys, to_asciimatics_list, write_to_file, remove_vlan_members
 
 
 class InterfaceFrame(InterruptFrame):
@@ -54,15 +54,10 @@ class InterfaceFrame(InterruptFrame):
                 return
 
             linux_member = deepcopy(self.widget_dict["drop_member"].value)
-            if "members" in linux_member.keys():
-                for i in linux_member["members"]:
-                    if i["type"] == "vlan":
-                        linux_member["members"].remove(i)
-                    if not linux_member["members"]:
-                        linux_member.pop("members")
+            remove_vlan_members(linux_member)
             write_to_file("example", linux_member)
 
-            if len(self.member_list) == [(["None"], None)]:
+            if self.member_list == [(["None"], None)]:
                 self.widget_dict["members"].options = []
             if self.widget_dict["drop_member"].value["type"] == "vlan":
                 self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)

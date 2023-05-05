@@ -5,7 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
 from NetworkObjectFrames.network_object_attributes import ovs_dpdk_port
 from NetworkObjectFrames.ovs_dpdk_bond import OVSDpdkBondFrame
-from utils import remove_empty_keys
+from utils import remove_empty_keys, remove_vlan_members
 
 
 class OVSDpdkPortFrame(OVSDpdkBondFrame):
@@ -107,10 +107,7 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
-            if "members" in self.linux_data.keys():
-                for i in self.linux_data["members"]:
-                    if i["type"] == "vlan":
-                        self.linux_data["members"].remove(i)
+            remove_vlan_members(self.linux_data)
             self.linux_data = remove_empty_keys(self.linux_data)
             if self._model.edit_mode:
                 if len(self._model.ovs_edit_objects):
