@@ -6,10 +6,10 @@ from os.path import exists
 
 
 class MappingsModel(object):
-
     nic_list = []
     nic_show_list = []
     hardware_objects = []
+
     @staticmethod
     def remove_nic(nic_list, nic_name):
         while (nic_name, nic_name) in nic_list:

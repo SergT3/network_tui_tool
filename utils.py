@@ -95,4 +95,3 @@ def remove_deep_member(net_object, member):
                 remove_deep_member(i, member)
         if not net_object["members"]:
             net_object.pop("members")
-

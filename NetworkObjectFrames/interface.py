@@ -55,9 +55,9 @@ class InterfaceFrame(InterruptFrame):
 
             linux_member = deepcopy(self.widget_dict["drop_member"].value)
             remove_vlan_members(linux_member)
-            write_to_file("example", linux_member)
+            # write_to_file("example", linux_member)
 
-            if self.member_list == [(["None"], None)]:
+            if self.widget_dict["members"].options == [(["None"], None)]:
                 self.widget_dict["members"].options = []
             if self.widget_dict["drop_member"].value["type"] == "vlan":
                 self._model.ovs_objects.remove(self.widget_dict["drop_member"].value)
@@ -98,6 +98,8 @@ class InterfaceFrame(InterruptFrame):
                     else:
                         self._model.linux_members.append(linux_member)
             self.widget_dict["members"]._required_height = len(self.member_list)
+            if None in self.widget_dict["members"].options:
+                self.widget_dict["members"].options.remove(None)
             self.fix()
 
     def _on_load(self):

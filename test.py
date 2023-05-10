@@ -1,6 +1,5 @@
 from netconfig import NetConfig
-from utils import remove_vlan_members,read_from_yaml
-
+from utils import remove_vlan_members, read_from_yaml
 
 test = NetConfig()
 test.run()
