@@ -131,7 +131,7 @@ class ConfigsModel(object):
                 if exists("Configs/Alt_config_members/" + self.current_config_name + "_members_linux.yaml"):
                     rm.rm("Configs/Alt_config_members/" + self.current_config_name + "_members_linux.yaml")
                 write_to_file("Configs/Config_members/" + self.current_config_name + "_members_linux.yaml",
-                              self.ovs_members)
+                              self.linux_members)
                 write_to_file("Configs/Alt_config_members/" + self.current_config_name + "_members_ovs.yaml",
                               self.ovs_members)
             else:
@@ -142,7 +142,7 @@ class ConfigsModel(object):
                 write_to_file("Configs/Config_members/" + self.current_config_name + "_members_ovs.yaml",
                               self.ovs_members)
                 write_to_file("Configs/Alt_config_members/" + self.current_config_name + "_members_linux.yaml",
-                              self.ovs_members)
+                              self.linux_members)
 
     def get_config_members(self):
         if self.current_config_name is not None:
@@ -237,6 +237,7 @@ class ConfigsModel(object):
                 for i in self.linux_objects:
                     remove_deep_member(i, linux_object_to_remove)
             self.linux_members.remove(linux_object_to_remove)
+        self.current_network_object = {}
 
     def add_interface(self):
         raise NextScene("Interface")

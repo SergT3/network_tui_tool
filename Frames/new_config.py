@@ -109,9 +109,10 @@ class NewConfigFrame(InterruptFrame):
         if self.selected_object is not None:
             if self.selected_object in self._model.ovs_members:
                 for i in self._model.ovs_objects:
-                    if self.selected_object in i["members"]:
-                        i["members"].remove(self.selected_object)
-                        self._model.ovs_edit_objects.append(i)
+                    if "members" in i.keys():
+                        if self.selected_object in i["members"]:
+                            i["members"].remove(self.selected_object)
+                            self._model.ovs_edit_objects.append(i)
                 self._model.ovs_members.remove(self.selected_object)
             elif self.selected_object in self._model.ovs_objects:
                 self._model.ovs_objects.remove(self.selected_object)
@@ -125,9 +126,10 @@ class NewConfigFrame(InterruptFrame):
                     self._model.linux_members.remove(linux_selected_object)
                 else:
                     for i in self._model.linux_objects:
-                        if linux_selected_object in i["members"]:
-                            i["members"].remove(linux_selected_object)
-                            self._model.linux_edit_objects.append(i)
+                        if "members" in i.keys():
+                            if linux_selected_object in i["members"]:
+                                i["members"].remove(linux_selected_object)
+                                self._model.linux_edit_objects.append(i)
                     self._model.linux_members.remove(linux_selected_object)
 
             elif linux_selected_object in self._model.linux_objects:

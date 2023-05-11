@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
 from interruptframe import InterruptFrame
-from utils import remove_empty_keys, to_asciimatics_list, write_to_file, remove_vlan_members
+from utils import remove_empty_keys, to_asciimatics_list, remove_vlan_members, write_to_file
 
 
 class InterfaceFrame(InterruptFrame):
@@ -55,8 +55,6 @@ class InterfaceFrame(InterruptFrame):
 
             linux_member = deepcopy(self.widget_dict["drop_member"].value)
             remove_vlan_members(linux_member)
-            # write_to_file("example", linux_member)
-
             if self.widget_dict["members"].options == [(["None"], None)]:
                 self.widget_dict["members"].options = []
             if self.widget_dict["drop_member"].value["type"] == "vlan":
@@ -89,14 +87,14 @@ class InterfaceFrame(InterruptFrame):
                     if self.widget_dict["drop_member"].value["type"] == "vlan":
                         self._model.linux_objects.append(vlan_with_device)
                     else:
-                        self._model.linux_objects.append(linux_member)
-            for i in self._model.linux_members:
-                if i == linux_member:
-                    self._model.linux_members.remove(i)
-                    if self.widget_dict["drop_member"].value["type"] == "vlan":
-                        self._model.linux_members.append(vlan_with_device)
-                    else:
                         self._model.linux_members.append(linux_member)
+            # for i in self._model.linux_members:
+            #     if i == linux_member:
+            #         self._model.linux_members.remove(i)
+            #         if self.widget_dict["drop_member"].value["type"] == "vlan":
+            #             self._model.linux_members.append(vlan_with_device)
+            #         else:
+            #             self._model.linux_members.append(linux_member)
             self.widget_dict["members"]._required_height = len(self.member_list)
             if None in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(None)
@@ -104,6 +102,7 @@ class InterfaceFrame(InterruptFrame):
 
     def _on_load(self):
         self.data["type"] = "interface"
+        self._model.get_interface_names()
         self.fill_common_attr()
         if self._model.current_network_object == {}:
             for i in interface:
@@ -203,6 +202,7 @@ class InterfaceFrame(InterruptFrame):
                     self.widget_dict[i].options = [(["None"], None)]
 
         else:
+            self.data.upadate(deepcopy(self._model.current_network_object))
             if "addresses" in self._model.current_network_object:
                 self.address_list = self._model.current_network_object["addresses"]
             if "dns_servers" in self._model.current_network_object:
@@ -287,6 +287,7 @@ class InterfaceFrame(InterruptFrame):
                 else:
                     self.widget_dict[i].value = ""
         else:
+            self.data = deepcopy(self._model.current_network_object)
             if "ovs_extra" in self._model.current_network_object:
                 self.ovs_extra_list = self._model.current_network_object["ovs_extra"]
             for i in ovs_common:
@@ -315,6 +316,7 @@ class InterfaceFrame(InterruptFrame):
 
     def _on_close(self, choice):
         if choice == 0:
+            # if self.
             self.ovs_data = deepcopy(self.data)
             self.ovs_data["addresses"] = self.address_list
             self.ovs_data["dns_servers"] = self.dns_list
@@ -340,7 +342,7 @@ class InterfaceFrame(InterruptFrame):
             else:
                 self._model.handle_ovs_object(self.ovs_data)
                 self._model.handle_linux_object(self.ovs_data)
-                self._model.current_network_object = {}
+            self._model.current_network_object = {}
             raise NextScene("NewConfig")
 
     def _cancel(self):
