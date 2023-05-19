@@ -22,9 +22,7 @@ class LinuxBondFrame(InterfaceFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "linux_bond"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "linux_bond"
         self.add_common_attr()
         for i in linux_bond:
             if i == "members":

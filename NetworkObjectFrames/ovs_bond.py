@@ -5,7 +5,7 @@ from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpD
 
 import utils
 from NetworkObjectFrames.linux_bond import LinuxBondFrame
-from NetworkObjectFrames.network_object_attributes import ovs_bond
+from NetworkObjectFrames.network_object_attributes import ovs_bond, ovs_common
 from utils import remove_empty_keys, remove_vlan_members
 
 
@@ -23,9 +23,7 @@ class OVSBondFrame(LinuxBondFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "ovs_bond"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "ovs_bond"
         self.add_common_attr()
         self.add_ovs_common_attr()
         for i in ovs_bond:
@@ -39,6 +37,8 @@ class OVSBondFrame(LinuxBondFrame):
                                                          add_scroll_bar=True, label=i, name=i,
                                                          on_select=self._show_member)
                 self.layout1.add_widget(self.widget_dict[i])
+        self.widget_dict["bonding_options"] = Text(label="bonding_options", name="bonding_options")
+        self.layout1.add_widget(self.widget_dict["bonding_options"])
         layout2 = Layout([1, 1, 1, 1])
         self.add_layout(layout2)
         layout2.add_widget(Button("Save", self._save_update))
@@ -50,12 +50,17 @@ class OVSBondFrame(LinuxBondFrame):
             self.ovs_data = deepcopy(self.data)
             self.ovs_data["addresses"] = deepcopy(self.address_list)
             self.ovs_data["dns_servers"] = deepcopy(self.dns_list)
-            self.ovs_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.ovs_data["domain"] = deepcopy(self.domain_list)
             self.ovs_data["routes"] = deepcopy(self.route_list)
             self.ovs_data["rules"] = deepcopy(self.rule_list)
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            if not self.ovs_extra_list and self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None:
+                self.ovs_data["type"] = "linux_bond"
+            else:
+                self.ovs_data["bonding_options"] = None
             self.ovs_data = remove_empty_keys(self.ovs_data)
+
             self.linux_data = deepcopy(self.ovs_data)
             remove_vlan_members(self.linux_data)
             self.linux_data = remove_empty_keys(self.linux_data)
@@ -84,6 +89,11 @@ class OVSBondFrame(LinuxBondFrame):
     def _on_load(self):
         super()._on_load()
         self.data["type"] = "ovs_bond"
+        if "bonding_options" in self._model.current_network_object:
+            self.data["bonding_options"] = self._model.current_network_object["bonding_options"]
+            self.widget_dict["bonding_options"].value = self._model.current_network_object["bonding_options"]
+        else:
+            self.widget_dict["bonding_options"].value = ""
         self.fill_ovs_common_attr()
 
     def _add_option(self):
@@ -128,5 +138,3 @@ class OVSBondFrame(LinuxBondFrame):
                 self.widget_dict["ovs_extra"].options = [("None", None)]
             self.selected_option = None
             self.fix()
-
-

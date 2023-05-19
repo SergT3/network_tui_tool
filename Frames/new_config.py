@@ -3,6 +3,7 @@ from copy import deepcopy
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
 
+from NetworkObjectFrames.network_object_attributes import ovs_common
 from interruptframe import InterruptFrame
 
 from utils import remove_vlan_members
@@ -18,44 +19,45 @@ class NewConfigFrame(InterruptFrame):
         return "NewConfig"
 
     def init_layout(self):
-        self._ovs_menu = [
-            ("interface", self._model.add_interface),
-            ("vlan", self._model.add_vlan),
-            ("OVS_bridge", self._model.add_ovs_bridge),
-            ("OVS_bond", self._model.add_ovs_bond),
-            ("OVS_user_bridge", self._model.add_ovs_user_bridge),
-            ("OVS_dpdk_bond", self._model.add_ovs_dpdk_bond),
-            ("OVS_dpdk_port", self._model.add_ovs_dpdk_port)
-        ]
-        self._linux_menu = [
-            ("interface", self._model.add_interface),
-            ("vlan", self._model.add_vlan),
-            ("linux_bridge", self._model.add_linux_bridge),
-            ("linux_bond", self._model.add_linux_bond)
-        ]
+        # self._ovs_menu = [
+        #     ("interface", self._model.add_interface),
+        #     ("vlan", self._model.add_vlan),
+        #     ("OVS_bridge", self._model.add_ovs_bridge),
+        #     ("OVS_bond", self._model.add_ovs_bond),
+        #     ("OVS_user_bridge", self._model.add_ovs_user_bridge),
+        #     ("OVS_dpdk_bond", self._model.add_ovs_dpdk_bond),
+        #     ("OVS_dpdk_port", self._model.add_ovs_dpdk_port)
+        # ]
+        # self._linux_menu = [
+        #     ("interface", self._model.add_interface),
+        #     ("vlan", self._model.add_vlan),
+        #     ("linux_bridge", self._model.add_linux_bridge),
+        #     ("linux_bond", self._model.add_linux_bond)
+        # ]
+
+
         gap_layout1 = Layout([1])
         self.add_layout(gap_layout1)
         self.config_name = Label("")
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
         gap_layout1.add_widget(self.config_name)
         gap_layout1.add_widget(Divider(draw_line=False, height=3))
-        layout1 = Layout([1, 1, 1, 1])
-        self.add_layout(layout1)
-        layout1.add_widget(Button("Edit", self._edit), 0)
+
         # layout1.add_widget(Button("Raw", self._raw), 1)
-        self.ovs_box = CheckBox("OVS", on_change=self._checkbox, name="OVS")
-        self.linux_box = CheckBox("Linux", on_change=self._checkbox, name="linux")
-        layout1.add_widget(self.ovs_box, 2)
-        layout1.add_widget(self.linux_box, 3)
+        # self.ovs_box = CheckBox("OVS", on_change=self._checkbox, name="OVS")
+        # self.linux_box = CheckBox("Linux", on_change=self._checkbox, name="linux")
+        # layout1.add_widget(self.ovs_box, 2)
+        # layout1.add_widget(self.linux_box, 3)
         gap_layout2 = Layout([1])
         self.add_layout(gap_layout2)
         gap_layout2.add_widget(Divider(draw_line=False, height=3))
-        layout2 = Layout([1, 1, 1, 1])
-        self.add_layout(layout2)
-        layout2.add_widget(Button("Save", self._save_update))
-        layout2.add_widget(Button("Add", self._add), 1)
-        layout2.add_widget(Button("Delete", self._delete), 2)
-        layout2.add_widget(Button("Cancel", self._cancel), 3)
+        layout1 = Layout([1, 1, 1, 1, 1])
+        self.add_layout(layout1)
+        layout1.add_widget(Button("Save", self._save_update))
+        layout1.add_widget(Button("Add", self._add), 1)
+        layout1.add_widget(Button("Edit", self._edit), 2)
+        layout1.add_widget(Button("Delete", self._delete), 3)
+        layout1.add_widget(Button("Cancel", self._cancel), 4)
         gap_layout3 = Layout([1])
         self.add_layout(gap_layout3)
         gap_layout3.add_widget(Divider(draw_line=False, height=3))
@@ -67,12 +69,29 @@ class NewConfigFrame(InterruptFrame):
         self.fix()
 
     def _on_load(self):
+
+        self.pop_up_menu_list = [
+            ("interface", self._model.add_interface),
+            ("vlan", self._model.add_vlan),
+            ("bridge", self._model.add_linux_bridge),
+            ("bond", self._model.add_linux_bond),
+            ("OVS_user_bridge", self._model.add_ovs_user_bridge),
+            ("OVS_dpdk_bond", self._model.add_ovs_dpdk_bond),
+            ("OVS_dpdk_port", self._model.add_ovs_dpdk_port)
+        ]
+
         self._model.get_config_members()
         self.update_object_list()
         if self._model.current_network_object != {}:
             if self._model.current_network_object["type"] == "vlan":
                 self.object_list.options.append(([self._model.current_network_object["vlan_id"],
                                                   self._model.current_network_object["type"]],
+                                                 self._model.current_network_object))
+            elif self._model.current_network_object["type"] in ["linux_bond", "ovs_bond"]:
+                self.object_list.options.append(([self._model.current_network_object["name"], "bond"],
+                                                 self._model.current_network_object))
+            elif self._model.current_network_object["type"] in ["linux_bridge", "ovs_bridge"]:
+                self.object_list.options.append(([self._model.current_network_object["name"], "bridge"],
                                                  self._model.current_network_object))
             else:
                 self.object_list.options.append(([self._model.current_network_object["name"],
@@ -84,26 +103,26 @@ class NewConfigFrame(InterruptFrame):
                 self.object_list.options.remove((["None"], None))
         self.object_list._required_height = len(self.object_list.options)
         self.fix()
-        self.ovs_box.value = False
-        self.linux_box.value = False
+        # self.ovs_box.value = False
+        # self.linux_box.value = False
 
     def _show(self):
         self.save()
         self.selected_object = self.object_list.value
 
-    def _checkbox(self):
-        if self.ovs_box.value == self.linux_box.value:
-            self.ovs_box.disabled = False
-            self.linux_box.disabled = False
-            self.pop_up_menu_list = self._linux_menu + self._ovs_menu
-            self.pop_up_menu_list.remove(("interface", self._model.add_interface))
-            self.pop_up_menu_list.remove(("vlan", self._model.add_vlan))
-        if self.linux_box.value and not self.ovs_box.value:
-            self.pop_up_menu_list = self._linux_menu
-            self.ovs_box.disabled = True
-        if self.ovs_box.value and not self.linux_box.value:
-            self.pop_up_menu_list = self._ovs_menu
-            self.linux_box.disabled = True
+    # def _checkbox(self):
+    #     if self.ovs_box.value == self.linux_box.value:
+    #         self.ovs_box.disabled = False
+    #         self.linux_box.disabled = False
+    #         self.pop_up_menu_list = self._linux_menu + self._ovs_menu
+    #         self.pop_up_menu_list.remove(("interface", self._model.add_interface))
+    #         self.pop_up_menu_list.remove(("vlan", self._model.add_vlan))
+    #     if self.linux_box.value and not self.ovs_box.value:
+    #         self.pop_up_menu_list = self._linux_menu
+    #         self.ovs_box.disabled = True
+    #     if self.ovs_box.value and not self.linux_box.value:
+    #         self.pop_up_menu_list = self._ovs_menu
+    #         self.linux_box.disabled = True
 
     def _edit(self):
         if self.selected_object is not None:
@@ -145,9 +164,9 @@ class NewConfigFrame(InterruptFrame):
             if obj_type == "vlan":
                 raise NextScene("Vlan")
             if obj_type == "linux_bond":
-                raise NextScene("LinuxBond")
+                raise NextScene("OVSBond")
             if obj_type == "linux_bridge":
-                raise NextScene("LinuxBridge")
+                raise NextScene("OVSBridge")
             if obj_type == "ovs_bond":
                 raise NextScene("OVSBond")
             if obj_type == "ovs_bridge":
@@ -186,6 +205,10 @@ class NewConfigFrame(InterruptFrame):
 
     def _on_close(self, choice):
         if choice == 0:
+            if self.linux_mode.value:
+                self.linux_swap()
+            else:
+                self.ovs_swap()
             self._model.write_config(self.linux_mode.value)
             self._model.write_config_members(self.linux_mode.value)
             self._model.current_config_name = None
@@ -204,6 +227,10 @@ class NewConfigFrame(InterruptFrame):
             self._model.remove_object(self.selected_object)
             if self.selected_object["type"] == "vlan":
                 self.object_list.options.remove(([self.selected_object["vlan_id"], self.selected_object["type"]], self.selected_object))
+            elif self.selected_object["type"] in ["linux_bond", "ovs_bond"]:
+                self.object_list.options.remove(([self.selected_object["name"], "bond"], self.selected_object))
+            elif self.selected_object["type"] in ["linux_bridge", "ovs_bridge"]:
+                self.object_list.options.remove(([self.selected_object["name"], "bridge"], self.selected_object))
             else:
                 self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
             self.selected_object = None
@@ -222,6 +249,12 @@ class NewConfigFrame(InterruptFrame):
                     if i["type"] == "vlan":
                         if ([i["vlan_id"], i["type"]], i) not in self.object_list.options:
                             self.object_list.options.append(([i["vlan_id"], i["type"]], i))
+                    elif i["type"] in ["linux_bond", "ovs_bond"]:
+                        if ([i["name"], i["type"]], i) not in self.object_list.options:
+                            self.object_list.options.append(([i["name"], "bond"], i))
+                    elif i["type"] in ["linux_bridge", "ovs_bridge"]:
+                        if ([i["name"], i["type"]], i) not in self.object_list.options:
+                            self.object_list.options.append(([i["name"], "bridge"], i))
                     else:
                         if ([i["name"], i["type"]], i) not in self.object_list.options:
                             self.object_list.options.append(([i["name"], i["type"]], i))
@@ -229,3 +262,41 @@ class NewConfigFrame(InterruptFrame):
                 self.object_list.options = [(["None"], None)]
         self.object_list._required_height = len(self.object_list.options)
         self.fix()
+
+    def ovs_swap(self):
+        for i in self._model.ovs_objects + self._model.ovs_members + self._model.linux_objects + self._model.linux_members:
+            self.ovs_swap_util(i)
+            if "members" in i.keys():
+                for j in i["members"]:
+                    if j["type"] in ["linux_bridge", "linux_bond"]:
+                        self.ovs_swap_util(j)
+
+    def linux_swap(self):
+        for i in self._model.ovs_objects + self._model.ovs_members + self._model.linux_objects + self._model.linux_members:
+            self.linux_swap_util(i)
+            if "members" in i.keys():
+                for j in i["members"]:
+                    if j["type"] in ["ovs_bridge", "ovs_bond"]:
+                        self.linux_swap_util(j)
+
+    @staticmethod
+    def ovs_swap_util(net_object):
+        if net_object["type"] == "linux_bridge":
+            net_object["type"] = "ovs_bridge"
+        if net_object["type"] == "linux_bond":
+            net_object["type"] = "ovs_bond"
+            if "bonding_options" in net_object.keys():
+                net_object.pop("bonding_options")
+
+    @staticmethod
+    def linux_swap_util(net_object):
+        if net_object["type"] == "ovs_bridge":
+            for i in net_object.keys():
+                if i in ovs_common:
+                    net_object.pop(i)
+            net_object["type"] = "linux_bridge"
+        if net_object["type"] == "ovs_bond":
+            for i in net_object.keys():
+                if i in ovs_common:
+                    net_object.pop(i)
+            net_object["type"] = "linux_bond"

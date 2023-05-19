@@ -6,7 +6,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
 from interruptframe import InterruptFrame
-from utils import remove_empty_keys, to_asciimatics_list, remove_vlan_members, write_to_file
+from utils import remove_empty_keys, to_asciimatics_list, remove_vlan_members
 
 
 class InterfaceFrame(InterruptFrame):
@@ -30,9 +30,7 @@ class InterfaceFrame(InterruptFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "interface"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "interface"
         self.add_common_attr()
         for i in interface:
             if i == "hotplug":
@@ -52,7 +50,6 @@ class InterfaceFrame(InterruptFrame):
             self.widget_dict["MemberPopUp"].save()
             if self.widget_dict["drop_member"].value is None:
                 return
-
             linux_member = deepcopy(self.widget_dict["drop_member"].value)
             remove_vlan_members(linux_member)
             if self.widget_dict["members"].options == [(["None"], None)]:
@@ -202,7 +199,7 @@ class InterfaceFrame(InterruptFrame):
                     self.widget_dict[i].options = [(["None"], None)]
 
         else:
-            self.data.upadate(deepcopy(self._model.current_network_object))
+            self.data.update(deepcopy(self._model.current_network_object))
             if "addresses" in self._model.current_network_object:
                 self.address_list = self._model.current_network_object["addresses"]
             if "dns_servers" in self._model.current_network_object:
@@ -562,3 +559,4 @@ class InterfaceFrame(InterruptFrame):
                 self.widget_dict["rules"].options = [(["None"], None)]
             self.selected_rule = None
             self.fix()
+

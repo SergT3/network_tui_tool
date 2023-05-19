@@ -22,9 +22,7 @@ class OVSBridgeFrame(LinuxBridgeFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "ovs_bridge"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "ovs_bridge"
         self.add_common_attr()
         self.add_ovs_common_attr()
         for i in ovs_bridge:
@@ -54,11 +52,13 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.ovs_data = deepcopy(self.data)
             self.ovs_data["addresses"] = deepcopy(self.address_list)
             self.ovs_data["dns_servers"] = deepcopy(self.dns_list)
-            self.ovs_data["domain"] = deepcopy(self.ovs_extra_list)
+            self.ovs_data["domain"] = deepcopy(self.domain_list)
             self.ovs_data["routes"] = deepcopy(self.route_list)
             self.ovs_data["rules"] = deepcopy(self.rule_list)
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+            if not self.ovs_extra_list and self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None:
+                self.ovs_data["type"] = "linux_bridge"
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
             remove_vlan_members(self.linux_data)
@@ -127,4 +127,3 @@ class OVSBridgeFrame(LinuxBridgeFrame):
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
-

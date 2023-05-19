@@ -18,9 +18,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "ovs_dpdk_bond"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "ovs_dpdk_bond"
         self.add_common_attr()
         self.add_ovs_common_attr()
         for i in ovs_dpdk_bond:

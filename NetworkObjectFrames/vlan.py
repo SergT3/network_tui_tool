@@ -25,9 +25,7 @@ class VlanFrame(InterruptFrame):
         self.layout1 = Layout([1, 1, 1, 1], True)
         self.add_layout(self.layout1)
         self.widget_dict = {}
-        object_type = Text(label="type", name="type", readonly=True)
-        object_type.value = "vlan"
-        self.layout1.add_widget(object_type)
+        self.data["type"] = "vlan"
         for i in vlan_text:
             self.widget_dict[i] = Text(label=i, name=i)
             self.layout1.add_widget(self.widget_dict[i])

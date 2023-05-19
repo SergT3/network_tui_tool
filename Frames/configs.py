@@ -246,10 +246,10 @@ class ConfigsModel(object):
         raise NextScene("Vlan")
 
     def add_linux_bridge(self):
-        raise NextScene("LinuxBridge")
+        raise NextScene("OVSBridge")
 
     def add_linux_bond(self):
-        raise NextScene("LinuxBond")
+        raise NextScene("OVSBond")
 
     def add_ovs_bridge(self):
         raise NextScene("OVSBridge")
