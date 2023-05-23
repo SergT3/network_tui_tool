@@ -83,6 +83,7 @@ class InterfaceFrame(InterruptFrame):
                     self._model.linux_objects.remove(i)
                     if self.widget_dict["drop_member"].value["type"] == "vlan":
                         self._model.linux_objects.append(vlan_with_device)
+                        self._model.linux_members.append(vlan_with_device)
                     else:
                         self._model.linux_members.append(linux_member)
             # for i in self._model.linux_members:

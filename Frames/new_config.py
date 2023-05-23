@@ -291,12 +291,12 @@ class NewConfigFrame(InterruptFrame):
     @staticmethod
     def linux_swap_util(net_object):
         if net_object["type"] == "ovs_bridge":
-            for i in net_object.keys():
+            for i in list(net_object):
                 if i in ovs_common:
                     net_object.pop(i)
             net_object["type"] = "linux_bridge"
         if net_object["type"] == "ovs_bond":
-            for i in net_object.keys():
+            for i in list(net_object):
                 if i in ovs_common:
                     net_object.pop(i)
             net_object["type"] = "linux_bond"

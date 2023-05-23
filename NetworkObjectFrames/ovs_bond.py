@@ -55,12 +55,12 @@ class OVSBondFrame(LinuxBondFrame):
             self.ovs_data["rules"] = deepcopy(self.rule_list)
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
-            if not self.ovs_extra_list and self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None:
+            if self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None and not self.ovs_extra_list:
                 self.ovs_data["type"] = "linux_bond"
             else:
+                self.ovs_data["type"] = "ovs_bond"
                 self.ovs_data["bonding_options"] = None
             self.ovs_data = remove_empty_keys(self.ovs_data)
-
             self.linux_data = deepcopy(self.ovs_data)
             remove_vlan_members(self.linux_data)
             self.linux_data = remove_empty_keys(self.linux_data)
@@ -107,7 +107,7 @@ class OVSBondFrame(LinuxBondFrame):
     def get_available_members(self):
         if len(self._model.ovs_objects):
             for net_object in self._model.ovs_objects:
-                if net_object["type"] in ["interface", "ovs_bridge", "vlan"] \
+                if net_object["type"] in ["interface", "ovs_bridge", "linux_bridge", "vlan"] \
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
