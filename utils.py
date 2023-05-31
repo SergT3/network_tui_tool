@@ -1,8 +1,8 @@
 import glob
+import socket
 from copy import deepcopy
 from os.path import exists
 from os import chdir
-import netifaces
 import yaml
 
 
@@ -11,7 +11,9 @@ def list_files(pattern):
 
 
 def get_interfaces():
-    interface_list = netifaces.interfaces()
+    interface_list = []
+    for interface in socket.if_nameindex():
+        interface_list.append(interface[1])
     for i in interface_list:
         if not exists("/sys/class/net/" + i + "/device"):
             interface_list.remove(i)
