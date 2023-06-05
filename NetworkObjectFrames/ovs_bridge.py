@@ -4,7 +4,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, PopUpDialog, MultiColumnListBox
 
 from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame
-from NetworkObjectFrames.network_object_attributes import ovs_bridge
+from NetworkObjectFrames.network_object_attributes import ovs_bridge, ovs_common
 from utils import remove_empty_keys, remove_vlan_members
 
 
@@ -57,10 +57,12 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             self.ovs_data["rules"] = deepcopy(self.rule_list)
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
-            if self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None and not self.ovs_extra_list:
-                self.ovs_data["type"] = "linux_bridge"
-            else:
-                self.ovs_data["type"] = "ovs_bridge"
+            for i in ovs_common:
+                if i in self.ovs_data.keys():
+                    self.ovs_data["type"] = "ovs_bridge"
+            for i in ovs_common:
+                if i in self.ovs_data.keys():
+                    self.ovs_data["type"] = "linux_bridge"
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
             remove_vlan_members(self.linux_data)

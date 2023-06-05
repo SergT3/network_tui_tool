@@ -55,11 +55,14 @@ class OVSBondFrame(LinuxBondFrame):
             self.ovs_data["rules"] = deepcopy(self.rule_list)
             self.ovs_data["members"] = deepcopy(self.member_list)
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
-            if self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None and not self.ovs_extra_list:
+            for i in ovs_common:
+                if i in self.ovs_data.keys():
+                    # if self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None and not self.ovs_extra_list:
+                    self.ovs_data["type"] = "ovs_bond"
+                    if "bonding_options" in self.ovs_data.keys():
+                        self.ovs_data.pop("bonding_options")
+            if "bonding_options" in self.ovs_data.keys():
                 self.ovs_data["type"] = "linux_bond"
-            else:
-                self.ovs_data["type"] = "ovs_bond"
-                self.ovs_data["bonding_options"] = None
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
             remove_vlan_members(self.linux_data)
