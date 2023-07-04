@@ -19,22 +19,6 @@ class NewConfigFrame(InterruptFrame):
         return "NewConfig"
 
     def init_layout(self):
-        # self._ovs_menu = [
-        #     ("interface", self._model.add_interface),
-        #     ("vlan", self._model.add_vlan),
-        #     ("OVS_bridge", self._model.add_ovs_bridge),
-        #     ("OVS_bond", self._model.add_ovs_bond),
-        #     ("OVS_user_bridge", self._model.add_ovs_user_bridge),
-        #     ("OVS_dpdk_bond", self._model.add_ovs_dpdk_bond),
-        #     ("OVS_dpdk_port", self._model.add_ovs_dpdk_port)
-        # ]
-        # self._linux_menu = [
-        #     ("interface", self._model.add_interface),
-        #     ("vlan", self._model.add_vlan),
-        #     ("linux_bridge", self._model.add_linux_bridge),
-        #     ("linux_bond", self._model.add_linux_bond)
-        # ]
-
 
         gap_layout1 = Layout([1])
         self.add_layout(gap_layout1)
@@ -103,26 +87,10 @@ class NewConfigFrame(InterruptFrame):
                 self.object_list.options.remove((["None"], None))
         self.object_list._required_height = len(self.object_list.options)
         self.fix()
-        # self.ovs_box.value = False
-        # self.linux_box.value = False
 
     def _show(self):
         self.save()
         self.selected_object = self.object_list.value
-
-    # def _checkbox(self):
-    #     if self.ovs_box.value == self.linux_box.value:
-    #         self.ovs_box.disabled = False
-    #         self.linux_box.disabled = False
-    #         self.pop_up_menu_list = self._linux_menu + self._ovs_menu
-    #         self.pop_up_menu_list.remove(("interface", self._model.add_interface))
-    #         self.pop_up_menu_list.remove(("vlan", self._model.add_vlan))
-    #     if self.linux_box.value and not self.ovs_box.value:
-    #         self.pop_up_menu_list = self._linux_menu
-    #         self.ovs_box.disabled = True
-    #     if self.ovs_box.value and not self.linux_box.value:
-    #         self.pop_up_menu_list = self._ovs_menu
-    #         self.linux_box.disabled = True
 
     def _edit(self):
         if self.selected_object is not None:
@@ -193,7 +161,6 @@ class NewConfigFrame(InterruptFrame):
 
     def _save_update(self):
         self.save()
-        # write_to_file("data_value_old", self.data)
         self.pop_up = PopUpDialog(self._screen, "Save " + self.config_name.text + " in", ["OK", "Cancel"],
                                   on_close=self._on_close)
         self.ovs_mode = CheckBox("OVS mode", on_change=self.save_mode, name="OVS")
@@ -231,10 +198,11 @@ class NewConfigFrame(InterruptFrame):
                 self.object_list.options.remove(([self.selected_object["name"], "bond"], self.selected_object))
             elif self.selected_object["type"] in ["linux_bridge", "ovs_bridge"]:
                 self.object_list.options.remove(([self.selected_object["name"], "bridge"], self.selected_object))
-            else:
+            elif ([self.selected_object["name"], self.selected_object["type"]], self.selected_object) in self.object_list.options:
                 self.object_list.options.remove(([self.selected_object["name"], self.selected_object["type"]], self.selected_object))
-            self.selected_object = None
             self.fix()
+        self.selected_object = None
+
 
     def _cancel(self):
         self._model.discard_config_changes()

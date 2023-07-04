@@ -86,13 +86,6 @@ class InterfaceFrame(InterruptFrame):
                         self._model.linux_members.append(vlan_with_device)
                     else:
                         self._model.linux_members.append(linux_member)
-            # for i in self._model.linux_members:
-            #     if i == linux_member:
-            #         self._model.linux_members.remove(i)
-            #         if self.widget_dict["drop_member"].value["type"] == "vlan":
-            #             self._model.linux_members.append(vlan_with_device)
-            #         else:
-            #             self._model.linux_members.append(linux_member)
             self.widget_dict["members"]._required_height = len(self.member_list)
             if None in self.widget_dict["members"].options:
                 self.widget_dict["members"].options.remove(None)

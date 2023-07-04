@@ -57,7 +57,6 @@ class OVSBondFrame(LinuxBondFrame):
             self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
             for i in ovs_common:
                 if i in self.ovs_data.keys():
-                    # if self.ovs_data["ovs_options"] == "" and self.ovs_data["ovs_fail_mode"] is None and not self.ovs_extra_list:
                     self.ovs_data["type"] = "ovs_bond"
                     if "bonding_options" in self.ovs_data.keys():
                         self.ovs_data.pop("bonding_options")

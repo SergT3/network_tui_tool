@@ -58,11 +58,6 @@ class ConfigsModel(object):
             mkdir("Configs")
         if not exists("Configs/Alt_configs"):
             mkdir("Configs/Alt_configs")
-        # touch.touch(str("Configs/" + self.current_config_name + ".yaml"))
-        # chdir("Configs")
-        # temp = open(self.current_config_name + ".yaml", "w")
-        # temp.close()
-        # chdir("..")
         if linux_mode:
             if exists("Configs/" + self.current_config_name + "_ovs.yaml"):
                 rm.rm("Configs/" + self.current_config_name + "_ovs.yaml")
@@ -206,6 +201,14 @@ class ConfigsModel(object):
         if object_to_remove in self.ovs_members:
             for i in self.ovs_objects:
                 remove_deep_member(i, object_to_remove)
+            for i in self.ovs_members:
+                remove_deep_member(i, object_to_remove)
+            if "members" in object_to_remove.keys():
+                for i in object_to_remove["members"]:
+                    for j in self.ovs_members:
+                        remove_deep_member(j, i)
+                self.ovs_objects.append(i)
+                self.ovs_members.remove(i)
             self.ovs_members.remove(object_to_remove)
 
         if "members" in linux_object_to_remove.keys():
@@ -294,14 +297,10 @@ class ConfigsFrame(InterruptFrame):
         self.add_layout(layout2)
         self.configs_list = ListBox(1, [("None", None)], on_select=self._show, name="configs_list")
         layout2.add_widget(self.configs_list)
-        # descriptions = [("Description1", 1), ("Description2", 2), ("Description3", 3)]
-        # layout2.add_widget(ListBox(3, descriptions), 1)
         self.fix()
 
     def _add(self):
         self.pop_up = PopUpDialog(self._screen, "Enter name", ["OK", "Cancel"], on_close=self._on_close)
-        # pop_layout = Layout([1])
-        # pop_up.add_layout(pop_layout)
         self.pop_up._layouts[0].add_widget(Text("Here:", validator=self._model.name_validator, name="text"))
         self.pop_up.fix()
         self.scene.add_effect(self.pop_up)
@@ -341,7 +340,6 @@ class ConfigsFrame(InterruptFrame):
     def _show(self):
         self.save()
         self.selected_config = self.data["configs_list"]
-        # self.configs_list.blur()
 
     def update_configs_list(self):
         self.configs_list.options = self._model.get_configs()

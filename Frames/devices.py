@@ -20,7 +20,6 @@ class DevicesFrame(InterruptFrame):
         hardware_objects = to_asciimatics_list(get_interfaces())
         layout1.add_widget(ListBox(len(hardware_objects), hardware_objects))
         layout1.add_widget(Button("Done", self._save_update), 2)
-        # layout1.add_widget(Button("Mappings",screen.refresh()),2)
         self.fix()
 
     def _save_update(self):

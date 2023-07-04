@@ -1,7 +1,11 @@
+from copy import deepcopy
+
+from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox
 
-from NetworkObjectFrames.network_object_attributes import ovs_user_bridge
+from NetworkObjectFrames.network_object_attributes import ovs_user_bridge, ovs_common
 from NetworkObjectFrames.ovs_bridge import OVSBridgeFrame
+from utils import remove_empty_keys, remove_vlan_members
 
 
 class OVSUserBridgeFrame(OVSBridgeFrame):
@@ -79,7 +83,40 @@ class OVSUserBridgeFrame(OVSBridgeFrame):
         for i in self.member_list:
             if i["type"] != "ovs_dpdk_bond":
                 self.member_list.remove(i)
-        super()._on_close(choice)
+            if choice == 0:
+                self.ovs_data = deepcopy(self.data)
+                self.ovs_data["addresses"] = deepcopy(self.address_list)
+                self.ovs_data["dns_servers"] = deepcopy(self.dns_list)
+                self.ovs_data["domain"] = deepcopy(self.domain_list)
+                self.ovs_data["routes"] = deepcopy(self.route_list)
+                self.ovs_data["rules"] = deepcopy(self.rule_list)
+                self.ovs_data["members"] = deepcopy(self.member_list)
+                self.ovs_data["ovs_extra"] = deepcopy(self.ovs_extra_list)
+                self.ovs_data = remove_empty_keys(self.ovs_data)
+                self.linux_data = deepcopy(self.ovs_data)
+                remove_vlan_members(self.linux_data)
+                self.linux_data = remove_empty_keys(self.linux_data)
+                if self._model.edit_mode:
+                    if len(self._model.ovs_edit_objects):
+                        for i in self._model.ovs_objects:
+                            if i in self._model.ovs_edit_objects:
+                                i["members"].append(self.ovs_data)
+                    if len(self._model.linux_edit_objects):
+                        for i in self._model.linux_objects:
+                            if i in self._model.linux_edit_objects:
+                                i["members"].append(self.linux_data)
+                    self._model.ovs_edit_objects = []
+                    self._model.linux_edit_objects = []
+                    self._model.edit_mode = False
+                if self._model.member_edit:
+                    self._model.ovs_members.append(self.ovs_data)
+                    self._model.linux_members.append(self.linux_data)
+                else:
+                    self._model.handle_ovs_object(self.ovs_data)
+                    self._model.handle_linux_object(self.linux_data)
+                    self._model.write_config_members()
+                    self._model.current_network_object = {}
+                raise NextScene("NewConfig")
 
     def get_available_members(self):
         if self._model.ovs_objects:

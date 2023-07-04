@@ -60,8 +60,8 @@ class OVSBridgeFrame(LinuxBridgeFrame):
             for i in ovs_common:
                 if i in self.ovs_data.keys():
                     self.ovs_data["type"] = "ovs_bridge"
-            for i in ovs_common:
-                if i in self.ovs_data.keys():
+                    break
+                else:
                     self.ovs_data["type"] = "linux_bridge"
             self.ovs_data = remove_empty_keys(self.ovs_data)
             self.linux_data = deepcopy(self.ovs_data)
