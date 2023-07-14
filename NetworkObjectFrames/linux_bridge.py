@@ -120,6 +120,7 @@ class LinuxBridgeFrame(InterfaceFrame):
             raise NextScene("NewConfig")
 
     def get_available_members(self):
+        self.available_members = []
         if len(self._model.ovs_objects):
             for net_object in self._model.ovs_objects:
                 if net_object["type"] in ["interface", "linux_bond", "vlan"] \

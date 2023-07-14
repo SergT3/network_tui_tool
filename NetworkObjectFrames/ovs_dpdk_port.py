@@ -87,6 +87,7 @@ class OVSDpdkPortFrame(OVSDpdkBondFrame):
         self.fix()
 
     def get_available_members(self):
+        self.available_members = []
         if len(self._model.ovs_objects):
             for net_object in self._model.ovs_objects:
                 if net_object["type"] == "interface" \
