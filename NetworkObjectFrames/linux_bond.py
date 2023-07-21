@@ -15,7 +15,7 @@ class LinuxBondFrame(InterfaceFrame):
     pop_up_members = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "LinuxBond"
 
     def init_layout(self):
@@ -140,6 +140,12 @@ class LinuxBondFrame(InterfaceFrame):
                         and net_object not in self.member_list \
                         and net_object not in self._model.ovs_members:
                     self.available_members.append(net_object)
+
+    def _delete(self):
+        self._delete_member()
+
+    def _add(self):
+        self.add_member()
 
     def _add_member(self):
         self.save()

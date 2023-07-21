@@ -4,7 +4,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Label, Divider, Button, CheckBox, MultiColumnListBox, PopupMenu, PopUpDialog
 
 from NetworkObjectFrames.network_object_attributes import ovs_common
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 
 from utils import remove_vlan_members
 
@@ -15,7 +15,7 @@ class NewConfigFrame(InterruptFrame):
     linux_mode = None
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "NewConfig"
 
     def init_layout(self):

@@ -15,7 +15,7 @@ class OVSBridgeFrame(LinuxBridgeFrame):
     member_list = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "OVSBridge"
 
     def init_layout(self):
@@ -111,6 +111,12 @@ class OVSBridgeFrame(LinuxBridgeFrame):
 
     def _show_option(self):
         self.selected_option = self.widget_dict["ovs_extra"].value
+
+    def _delete(self):
+        self._delete_member()
+
+    def _add(self):
+        self.add_member()
 
     def _delete_option(self):
         if self.selected_option is not None:

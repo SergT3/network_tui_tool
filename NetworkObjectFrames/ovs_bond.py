@@ -16,7 +16,7 @@ class OVSBondFrame(LinuxBondFrame):
     member_list = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "OVSBond"
 
     def init_layout(self):
@@ -105,6 +105,12 @@ class OVSBondFrame(LinuxBondFrame):
                                                                     name="text"))
         self.widget_dict["OptionPopUp"].fix()
         self.scene.add_effect(self.widget_dict["OptionPopUp"])
+
+    def _delete(self):
+        self._delete_member()
+
+    def _add(self):
+        self.add_member()
 
     def get_available_members(self):
         self.available_members = []

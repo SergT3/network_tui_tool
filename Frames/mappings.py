@@ -1,6 +1,6 @@
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, DropdownList, Button, PopUpDialog, Text, Label
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 from utils import get_interfaces, to_asciimatics_list, indexed_dup_list, write_to_file, read_from_yaml
 from os.path import exists
 
@@ -44,7 +44,7 @@ class MappingsFrame(InterruptFrame):
     _selected_nic = None
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "Mappings"
 
     def init_layout(self):

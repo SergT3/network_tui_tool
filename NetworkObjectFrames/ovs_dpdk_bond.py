@@ -15,7 +15,7 @@ class OVSDpdkBondFrame(OVSBondFrame):
     member_list = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "OVSDpdkBond"
 
     def init_layout(self):
@@ -153,6 +153,12 @@ class OVSDpdkBondFrame(OVSBondFrame):
     #         self._model.linux_members.append(self.widget_dict["drop_member"].value)
     #         self.widget_dict["members"]._required_height = len(self.member_list)
     #         self.fix()
+
+    def _delete(self):
+        self._delete_member()
+
+    def _add(self):
+        self.add_member()
 
     def _delete_member(self):
         if self.selected_member is not None:

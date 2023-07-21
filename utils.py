@@ -5,6 +5,11 @@ from os.path import exists
 from os import chdir
 import yaml
 
+HEIGHT_MULTIPLIER = 1
+WIDTH_MULTIPLIER = 1
+
+bridge = ["LinuxBridge", "OVSBridge"]
+bond = ["LinuxBond", "OVSBond"]
 
 def list_files(pattern):
     return glob.glob(pattern)

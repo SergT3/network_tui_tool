@@ -5,7 +5,7 @@ from asciimatics.widgets import Layout, Text, CheckBox, Button, PopUpDialog, Lis
 
 from NetworkObjectFrames.network_object_attributes import common_text, common_check, common_list, ovs_common, \
     interface, route_titles
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 from utils import remove_empty_keys, to_asciimatics_list, remove_vlan_members
 
 
@@ -23,7 +23,7 @@ class InterfaceFrame(InterruptFrame):
     selected_rule = None
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "Interface"
 
     def init_layout(self):
@@ -117,7 +117,7 @@ class InterfaceFrame(InterruptFrame):
 
     def add_common_attr(self):
         for i in common_text:
-            if i == "name" and self.get_title() == "Interface":
+            if i == "name" and self.frame_title() == "Interface":
                 self._model.get_interface_names()
                 self.widget_dict[i] = DropdownList(to_asciimatics_list(self._model.nic_names), label=i, name=i)
                 self.layout1.add_widget(self.widget_dict[i])

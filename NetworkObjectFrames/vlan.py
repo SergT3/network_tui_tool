@@ -4,7 +4,7 @@ from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Text, Button, MultiColumnListBox, PopUpDialog, DropdownList
 
 from NetworkObjectFrames.network_object_attributes import vlan_text, vlan_list, route_titles
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 from utils import remove_empty_keys
 
 
@@ -18,7 +18,7 @@ class VlanFrame(InterruptFrame):
     pop_up_devices = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "Vlan"
 
     def init_layout(self):
@@ -98,6 +98,12 @@ class VlanFrame(InterruptFrame):
                     if "device" in self._model.current_network_object:
                         self.data[i] = self._model.current_network_object[i]
                         self.widget_dict[i].value = self._model.current_network_object[i]
+
+    def _delete(self):
+        pass
+
+    def _add(self):
+        pass
 
     def _on_close(self, choice):
         if choice == 0:

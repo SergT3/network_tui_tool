@@ -16,7 +16,7 @@ class LinuxBridgeFrame(InterfaceFrame):
     pop_up_members = []
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "LinuxBridge"
 
     def init_layout(self):
@@ -178,6 +178,12 @@ class LinuxBridgeFrame(InterfaceFrame):
 
     def _show_member(self):
         self.selected_member = self.widget_dict["members"].value
+
+    def _delete(self):
+        self._delete_member()
+
+    def _add(self):
+        self.add_member()
 
     def _delete_member(self):
         if self.selected_member is not None:

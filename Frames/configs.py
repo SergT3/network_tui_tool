@@ -7,7 +7,7 @@ import yaml
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Button, Divider, ListBox, PopUpDialog, Text
 
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 from utils import list_files, to_asciimatics_list, write_to_file, read_from_yaml, get_interfaces, remove_deep_member, \
     remove_vlan_members
 
@@ -274,7 +274,7 @@ class ConfigsFrame(InterruptFrame):
     selected_config = None
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "Configs"
 
     def init_layout(self):

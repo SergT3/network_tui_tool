@@ -1,14 +1,14 @@
 from asciimatics.exceptions import NextScene
 from asciimatics.widgets import Layout, Divider, ListBox, Button
 
-from interruptframe import InterruptFrame
+from frame import InterruptFrame
 from utils import get_interfaces, to_asciimatics_list
 
 
 class DevicesFrame(InterruptFrame):
 
     @staticmethod
-    def get_title():
+    def frame_title():
         return "Devices"
 
     def init_layout(self):

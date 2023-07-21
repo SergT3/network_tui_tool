@@ -49,15 +49,15 @@ class NetConfig(object):
         for frame in self.frames:
             #          if frame.get_title() == "Start" and hasattr(frame, "effects"):
             #        scene_obj = Scene(frame.effects, 0)
-            if frame.get_title() == "Configs" or frame.get_title() == "NewConfig"\
-                    or frame.get_title() == "Raw" or frame.get_title() in NetworkObjects:
+            if frame.frame_title() == "Configs" or frame.frame_title() == "NewConfig"\
+                    or frame.frame_title() == "Raw" or frame.frame_title() in NetworkObjects:
                 scene_obj = Scene([frame(screen,
-                                         model=shared_configs_model)], name=frame.get_title())
+                                         model=shared_configs_model)], name=frame.frame_title())
             else:
                 scene_obj = Scene([frame(screen,
-                                         model=ModelForFrame[frame.get_title() + "Frame"])], -1, name=frame.get_title())
+                                         model=ModelForFrame[frame.frame_title() + "Frame"])], -1, name=frame.frame_title())
             self.scenes.append(scene_obj)
-            self.scenes_by_name[frame.get_title()] = scene_obj
+            self.scenes_by_name[frame.frame_title()] = scene_obj
         return self.scenes
 
     def run(self):
