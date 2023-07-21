@@ -115,6 +115,12 @@ class InterfaceFrame(InterruptFrame):
                         self.widget_dict[i].value = ""
         self.fix()
 
+    def _delete(self):
+        pass
+
+    def _add(self):
+        pass
+
     def add_common_attr(self):
         for i in common_text:
             if i == "name" and self.frame_title() == "Interface":

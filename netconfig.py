@@ -13,18 +13,14 @@ from NetworkObjectFrames.linux_bridge import LinuxBridgeFrame
 from NetworkObjectFrames.vlan import VlanFrame
 from NetworkObjectFrames.interface import InterfaceFrame
 from Frames.configs import ConfigsFrame, ConfigsModel
-from Frames.devices import DevicesFrame
 from Frames.home import HomeFrame
 from Frames.mappings import MappingsFrame, MappingsModel
 from Frames.new_config import NewConfigFrame
-from Frames.raw import RawFrame
 
 ModelForFrame = {
-    # DevicesFrame: DevicesModel  here maybe "update devices" button will be added
     "HomeFrame": None,
     "MappingsFrame": MappingsModel,
-    "NICFrame": None,
-    "DevicesFrame": None,
+    "NICFrame": None
 }
 
 NetworkObjects = ["Interface", "Vlan", "LinuxBridge", "LinuxBond", "OVSBridge",
@@ -37,7 +33,7 @@ class NetConfig(object):
 
         self.scenes = []
         self.scenes_by_name = {}
-        self.frames = [HomeFrame, MappingsFrame, DevicesFrame, ConfigsFrame, NewConfigFrame, RawFrame,
+        self.frames = [HomeFrame, MappingsFrame, ConfigsFrame, NewConfigFrame,
                        InterfaceFrame, VlanFrame, LinuxBridgeFrame, LinuxBondFrame, OVSBridgeFrame, OVSBondFrame,
                        OVSUserBridgeFrame, OVSDpdkBondFrame, OVSDpdkPortFrame]
         self.last_scene = None
@@ -50,7 +46,7 @@ class NetConfig(object):
             #          if frame.get_title() == "Start" and hasattr(frame, "effects"):
             #        scene_obj = Scene(frame.effects, 0)
             if frame.frame_title() == "Configs" or frame.frame_title() == "NewConfig"\
-                    or frame.frame_title() == "Raw" or frame.frame_title() in NetworkObjects:
+                     or frame.frame_title() in NetworkObjects:
                 scene_obj = Scene([frame(screen,
                                          model=shared_configs_model)], name=frame.frame_title())
             else:

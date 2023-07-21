@@ -305,6 +305,9 @@ class ConfigsFrame(InterruptFrame):
         self.pop_up.fix()
         self.scene.add_effect(self.pop_up)
 
+    def _save_update(self):
+        pass
+
     def _on_close(self, choice):
         if choice == 0:
             self.pop_up.save()
