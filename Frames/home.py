@@ -33,7 +33,7 @@ class HomeFrame(InterruptFrame):
 
     def _change(self):
         self.save()
-        selected_option = self.data.get("Menu", None)
+        selected_option = self.data.get("menu", None)
         if selected_option:
             self.description.value = self.menu[selected_option]
         self.fix()
