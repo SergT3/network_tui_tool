@@ -18,7 +18,7 @@ class HomeFrame(InterruptFrame):
         layout1.add_widget(Label('Description'), 1)
         layout1.add_widget(ListBox(2, [("Mappings", "Mappings"), ("Configs", "Configs")],
                                    on_change=self._change, on_select=self._select,
-                                   name="Menu"))
+                                   name="menu"))
         self.description = TextBox(Widget.FILL_COLUMN, as_string=True, readonly=True, line_wrap=True,
                                    tab_stop=False)
         self.description.value = next(iter(self.menu.values()))
